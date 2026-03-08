@@ -1,0 +1,193 @@
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --secondary-color: #10b981;
+  --background-light: #f3f4f6;
+  --surface-light: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --border-color: #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --secondary-color: #34d399;
+    --background-light: #111827;
+    --surface-light: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background-light);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile App Wrapper */
+.app-container {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: var(--surface-light);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.content-area {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Typography */
+h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; }
+h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+p { margin-bottom: 1rem; color: var(--text-secondary); }
+
+/* Inputs and Forms */
+.input-group {
+  margin-bottom: 1rem;
+}
+.input-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+.btn-primary:active, .btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* Cards */
+.card {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Route Steps */
+.step-item {
+  display: flex;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.step-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 1;
+}
+.step-content {
+  margin-left: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  flex: 1;
+}
+.step-item::after {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 2rem;
+  bottom: -1rem;
+  width: 2px;
+  background-color: var(--border-color);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+.step-item:last-child::after {
+  display: none;
+}
+.step-item:last-child .step-content {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Navigation Bar */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--surface-light);
+  border-top: 1px solid var(--border-color);
+  padding: 0.75rem 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+.nav-item.active {
+  color: var(--primary-color);
+}
+.nav-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}

@@ -52,16 +52,30 @@ const Home = () => {
       <div style={{ marginTop: '2rem' }}>
         <h2>Recent Community Routes</h2>
         <div className="card" onClick={() => navigate('/route/1')} style={{ cursor: 'pointer' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <strong>EDSA Taft ➡️ SM North EDSA</strong>
-            <span style={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}>👍 124</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              EDSA Taft 
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg> 
+              SM North EDSA
+            </strong>
+            <span style={{ color: 'var(--secondary-color)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> 
+              124
+            </span>
           </div>
           <p style={{ margin: 0, fontSize: '0.875rem' }}>Via MRT-3 • 35 mins • ₱28.00</p>
         </div>
         <div className="card" onClick={() => navigate('/route/2')} style={{ cursor: 'pointer' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <strong>Ayala Triangle ➡️ BGC High Street</strong>
-            <span style={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}>👍 89</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Ayala Triangle 
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg> 
+              BGC High Street
+            </strong>
+            <span style={{ color: 'var(--secondary-color)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> 
+              89
+            </span>
           </div>
           <p style={{ margin: 0, fontSize: '0.875rem' }}>Via BGC Bus • 20 mins • ₱13.00</p>
         </div>

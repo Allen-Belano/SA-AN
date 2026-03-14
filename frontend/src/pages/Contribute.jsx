@@ -30,15 +30,15 @@ const Contribute = () => {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', marginRight: '1rem' }}>
-          ⬅️
+    <div className="screen-stack">
+      <div className="row-between">
+        <button className="btn-icon" onClick={() => navigate(-1)} aria-label="Go back">
+          ←
         </button>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Add a Route</h1>
+        <h1 style={{ margin: 0, flex: 1, marginLeft: '0.5rem' }}>Add a Route</h1>
       </div>
 
-      <div className="card">
+      <div className="card card-soft glass-card">
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Start Location</label>
@@ -61,14 +61,14 @@ const Contribute = () => {
             />
           </div>
 
-          <h3 style={{ margin: '1.5rem 0 1rem', fontSize: '1.1rem' }}>Steps</h3>
+          <h3 style={{ margin: '1rem 0 0.9rem', fontSize: '1.03rem' }}>Steps</h3>
           
           {steps.map((step, index) => (
-            <div key={index} style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', background: 'var(--background-light)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div key={index} className="step-editor">
+              <div className="row-between" style={{ marginBottom: '0.5rem' }}>
                 <strong style={{ fontSize: '0.9rem' }}>Step {index + 1}</strong>
                 {steps.length > 1 && (
-                  <button type="button" onClick={() => removeStep(index)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.25rem' }}>
+                  <button type="button" onClick={() => removeStep(index)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.1rem' }}>
                     ✕
                   </button>
                 )}
@@ -114,12 +114,12 @@ const Contribute = () => {
             type="button" 
             onClick={addStep} 
             className="btn" 
-            style={{ width: '100%', marginBottom: '1.5rem', border: '1px dashed var(--primary-color)', color: 'var(--primary-color)', background: 'transparent' }}
+            style={{ width: '100%', marginBottom: '1.1rem', border: '1px dashed var(--primary-color)', color: 'var(--primary-color)', background: 'rgba(255, 255, 255, 0.38)' }}
           >
             + Add Another Step
           </button>
 
-          <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <div className="notice-box" style={{ marginBottom: '1.1rem' }}>
             <span style={{ fontSize: '1.5rem' }}>🛡️</span>
             <div>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

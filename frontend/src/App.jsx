@@ -42,13 +42,33 @@ function App() {
   return (
     <Router>
       <div className="app-container">
+        <div className="ambient-layer">
+          <span className="orb orb-a" aria-hidden="true"></span>
+          <span className="orb orb-b" aria-hidden="true"></span>
+          <span className="orb orb-c" aria-hidden="true"></span>
+        </div>
         <div className="content-area">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<RouteSearch />} />
             <Route path="/route/:id" element={<RouteGuide />} />
             <Route path="/contribute" element={<Contribute />} />
-            <Route path="/profile" element={<h2>User Profile Placeholder</h2>} />
+            <Route
+              path="/profile"
+              element={
+                <div className="screen-stack">
+                  <div className="section-header">
+                    <h1>Profile</h1>
+                    <p>Feature preview in progress.</p>
+                  </div>
+                  <div className="card card-soft glass-card">
+                    <p className="muted-text" style={{ marginBottom: 0 }}>
+                      User profile module will appear here.
+                    </p>
+                  </div>
+                </div>
+              }
+            />
           </Routes>
         </div>
         <BottomNav />

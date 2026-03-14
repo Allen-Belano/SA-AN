@@ -49,15 +49,15 @@ const RouteSearch = () => {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', marginRight: '1rem' }}>
-          ⬅️
+    <div className="screen-stack">
+      <div className="row-between">
+        <button className="btn-icon" onClick={() => navigate(-1)} aria-label="Go back">
+          ←
         </button>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Search Routes</h1>
+        <h1 style={{ margin: 0, flex: 1, marginLeft: '0.5rem' }}>Search Routes</h1>
       </div>
 
-      <div className="card">
+      <div className="card card-soft glass-card">
         <form onSubmit={handleSearch}>
           <div className="input-group">
             <input 
@@ -77,34 +77,36 @@ const RouteSearch = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+          <button type="submit" className="btn btn-primary">
             Update Search
           </button>
         </form>
       </div>
 
-      <div style={{ marginTop: '1.5rem' }}>
+      <div className="inline-grid">
         <h2>Matching Routes</h2>
         
         {loading ? (
-          <p style={{ textAlign: 'center', padding: '2rem' }}>Loading routes...</p>
+          <div className="card card-soft" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ marginBottom: 0 }}>Loading routes...</p>
+          </div>
         ) : results.length > 0 ? (
           results.map(route => (
-            <div key={route.id} className="card" onClick={() => navigate(`/route/${route.id}`)} style={{ cursor: 'pointer' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                <strong style={{ fontSize: '1.1rem' }}>Via {route.modes.join(' + ')}</strong>
-                <span style={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}>👍 {route.votes}</span>
+            <div key={route.id} className="card card-soft" onClick={() => navigate(`/route/${route.id}`)} style={{ cursor: 'pointer' }}>
+              <div className="row-between" style={{ marginBottom: '0.25rem' }}>
+                <strong style={{ fontSize: '1rem' }}>Via {route.modes.join(' + ')}</strong>
+                <span className="vote-badge">👍 {route.votes}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
                 {route.time} • Est. Fare: {route.fare}
               </p>
-              <div style={{ fontSize: '0.75rem', marginTop: '0.75rem', color: '#9ca3af' }}>
+              <div className="muted-text" style={{ fontSize: '0.75rem', marginTop: '0.75rem' }}>
                 By: {route.author} | Verified
               </div>
             </div>
           ))
         ) : (
-          <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className="card card-soft" style={{ textAlign: 'center', padding: '2rem' }}>
             <p style={{ marginBottom: '1rem' }}>No community routes found yet.</p>
             <button className="btn btn-secondary" onClick={() => navigate('/contribute')}>
               Be the first to add this route!

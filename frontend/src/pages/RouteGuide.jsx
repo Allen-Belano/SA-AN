@@ -48,53 +48,37 @@ const RouteGuide = () => {
   const [activeTab, setActiveTab] = useState('steps');
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', marginRight: '1rem' }}>
-          ⬅️
+    <div className="screen-stack">
+      <div className="row-between">
+        <button className="btn-icon" onClick={() => navigate(-1)} aria-label="Go back">
+          ←
         </button>
-        <h1 style={{ margin: 0, fontSize: '1.25rem' }}>{route.start} to {route.destination}</h1>
+        <h1 style={{ margin: 0, flex: 1, marginLeft: '0.5rem', fontSize: '1.2rem' }}>
+          {route.start} to {route.destination}
+        </h1>
       </div>
 
-      <div className="card" style={{ marginBottom: '1rem', background: 'var(--primary-color)', color: 'white' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div className="card route-summary">
+        <div className="row-between" style={{ marginBottom: '0.9rem' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'white' }}>{route.time}</h2>
             <p style={{ margin: 0, color: 'rgba(255,255,255,0.8)' }}>Total Fare: {route.totalFare}</p>
           </div>
-          <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>
+          <div className="summary-votes">
             <span style={{ display: 'block', fontSize: '1.25rem' }}>👍 {route.votes}</span>
             <span style={{ fontSize: '0.75rem' }}>Helpful</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="tabs">
           <button 
-            style={{ 
-              flex: 1, 
-              padding: '0.5rem', 
-              borderRadius: '0.5rem', 
-              border: 'none', 
-              background: activeTab === 'steps' ? 'white' : 'rgba(255,255,255,0.2)',
-              color: activeTab === 'steps' ? 'var(--primary-color)' : 'white',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
+            className={`tab-btn ${activeTab === 'steps' ? 'active' : ''}`}
             onClick={() => setActiveTab('steps')}
           >
             Steps
           </button>
           <button 
-            style={{ 
-              flex: 1, 
-              padding: '0.5rem', 
-              borderRadius: '0.5rem', 
-              border: 'none', 
-              background: activeTab === 'map' ? 'white' : 'rgba(255,255,255,0.2)',
-              color: activeTab === 'map' ? 'var(--primary-color)' : 'white',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
+            className={`tab-btn ${activeTab === 'map' ? 'active' : ''}`}
             onClick={() => setActiveTab('map')}
           >
             Live Map
@@ -103,7 +87,7 @@ const RouteGuide = () => {
       </div>
 
       {activeTab === 'steps' ? (
-        <div className="card">
+        <div className="card card-soft">
           <h2 style={{ marginBottom: '1.5rem' }}>Route Instructions</h2>
           <div>
             {route.steps.map(step => (
@@ -126,19 +110,19 @@ const RouteGuide = () => {
             ))}
           </div>
 
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+          <div style={{ marginTop: '1.3rem', display: 'flex', gap: '0.7rem' }}>
             <button className="btn btn-secondary" style={{ flex: 1, padding: '0.75rem' }}>
               👍 Upvote
             </button>
-            <button className="btn" style={{ flex: 1, background: 'var(--surface-light)', color: 'var(--danger)', border: '1px solid var(--danger)' }}>
+            <button className="btn" style={{ flex: 1, background: 'var(--surface-strong)', color: 'var(--danger)', border: '1px solid rgba(215, 70, 85, 0.5)' }}>
               ⚠️ Report Issue
             </button>
           </div>
         </div>
       ) : (
-        <div className="card" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗺️</div>
-          <h3>Map Render Space</h3>
+        <div className="card card-soft glass-card" style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem', animation: 'floatY 4.5s ease-in-out infinite' }}>🗺️</div>
+          <h3 style={{ marginBottom: '0.4rem' }}>Map Render Space</h3>
           <p style={{ textAlign: 'center' }}>Integration with Mapbox or Google Maps goes here.</p>
           <button className="btn btn-primary" style={{ width: 'auto', marginTop: '1rem' }}>
             Start Navigation

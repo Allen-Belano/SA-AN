@@ -4,6 +4,13 @@ CREATE TABLE Users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     reputation_points INT DEFAULT 0,
+    bio TEXT,
+    home_location VARCHAR(255),
+    preferred_transport VARCHAR(100),
+    budget_level VARCHAR(50),
+    travel_window VARCHAR(100),
+    emergency_contact VARCHAR(255),
+    avatar_color VARCHAR(50) DEFAULT '#f0932b',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

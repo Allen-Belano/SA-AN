@@ -1,9 +1,18 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import RouteSearch from './pages/RouteSearch';
 import RouteGuide from './pages/RouteGuide';
 import Contribute from './pages/Contribute';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import { getStoredSession } from './api';
+
+const introLines = [
+  'For every daily biyahe.',
+  'For every transfer and turn.',
+  'For every commuter who wants a safer ride.',
+];
 
 const BottomNav = () => {
   const location = useLocation();
@@ -38,41 +47,130 @@ const BottomNav = () => {
   );
 };
 
-function App() {
+const ProtectedRoutes = () => {
+  const session = getStoredSession();
+
+  if (!session?.token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+};
+
+const PublicOnlyRoute = () => {
+  const session = getStoredSession();
+
+  if (session?.token) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Login />;
+};
+
+const AppLayout = () => {
+  const location = useLocation();
+  const hideNavigation = location.pathname === '/login';
+
   return (
-    <Router>
-      <div className="app-container">
-        <div className="ambient-layer">
-          <span className="orb orb-a" aria-hidden="true"></span>
-          <span className="orb orb-b" aria-hidden="true"></span>
-          <span className="orb orb-c" aria-hidden="true"></span>
-        </div>
-        <div className="content-area">
-          <Routes>
+    <div className="app-container">
+      <div className="ambient-layer">
+        <span className="orb orb-a" aria-hidden="true"></span>
+        <span className="orb orb-b" aria-hidden="true"></span>
+        <span className="orb orb-c" aria-hidden="true"></span>
+      </div>
+      <div className="content-area">
+        <Routes>
+          <Route path="/login" element={<PublicOnlyRoute />} />
+          <Route element={<ProtectedRoutes />}>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<RouteSearch />} />
             <Route path="/route/:id" element={<RouteGuide />} />
             <Route path="/contribute" element={<Contribute />} />
-            <Route
-              path="/profile"
-              element={
-                <div className="screen-stack">
-                  <div className="section-header">
-                    <h1>Profile</h1>
-                    <p>Feature preview in progress.</p>
-                  </div>
-                  <div className="card card-soft glass-card">
-                    <p className="muted-text" style={{ marginBottom: 0 }}>
-                      User profile module will appear here.
-                    </p>
-                  </div>
-                </div>
-              }
-            />
-          </Routes>
-        </div>
-        <BottomNav />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
+      {!hideNavigation && <BottomNav />}
+    </div>
+  );
+};
+
+const IntroScreen = () => {
+  const [lineIndex, setLineIndex] = useState(0);
+  const [showBrand, setShowBrand] = useState(false);
+
+  useEffect(() => {
+    const lineInterval = window.setInterval(() => {
+      setLineIndex((current) => {
+        if (current >= introLines.length - 1) {
+          window.clearInterval(lineInterval);
+          return current;
+        }
+
+        return current + 1;
+      });
+    }, 1800);
+
+    const brandTimer = window.setTimeout(() => {
+      setShowBrand(true);
+    }, 4800);
+
+    return () => {
+      window.clearInterval(lineInterval);
+      window.clearTimeout(brandTimer);
+    };
+  }, []);
+
+  return (
+    <div className="intro-shell" role="status" aria-label="SA/AN intro animation">
+      <div className="intro-orb orb-left" aria-hidden="true"></div>
+      <div className="intro-orb orb-right" aria-hidden="true"></div>
+      <div className={`intro-content ${showBrand ? 'fade-out' : ''}`}>
+        <span key={introLines[lineIndex]} className="intro-line">{introLines[lineIndex]}</span>
+      </div>
+      <div className={`intro-brand-wrap ${showBrand ? 'show' : ''}`}>
+        <div className="intro-brand-center">
+          <span className="brand-question q1" aria-hidden="true">?</span>
+          <span className="brand-question q2" aria-hidden="true">?</span>
+          <span className="brand-question q3" aria-hidden="true">?</span>
+          <span className="brand-question q4" aria-hidden="true">?</span>
+          <span className="brand-question q5" aria-hidden="true">?</span>
+          <span className="brand-question q6" aria-hidden="true">?</span>
+          <span className="brand-question q7" aria-hidden="true">?</span>
+          <span className="brand-question q8" aria-hidden="true">?</span>
+          <span className="brand-question q9" aria-hidden="true">?</span>
+          <div className="intro-brand-word" aria-label="SA slash AN">
+            <span className="brand-letter letter-s">S</span>
+            <span className="brand-letter letter-a1">A</span>
+            <span className="brand-separator">/</span>
+            <span className="brand-letter letter-a2">A</span>
+            <span className="brand-letter letter-n">N</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function App() {
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    const introTimer = window.setTimeout(() => {
+      setShowIntro(false);
+    }, 8500);
+
+    return () => window.clearTimeout(introTimer);
+  }, []);
+
+  if (showIntro) {
+    return <IntroScreen />;
+  }
+
+  return (
+    <Router>
+      <AppLayout />
     </Router>
   );
 }

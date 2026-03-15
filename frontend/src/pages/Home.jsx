@@ -1,10 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const commuterTips = [
+  {
+    id: 1,
+    icon: '🛡️',
+    title: 'Stay alert in crowded terminals',
+    description: 'Keep your bag in front, avoid displaying cash, and move toward well-lit, populated pickup points.',
+    meta: 'Best for rush hour commutes',
+  },
+  {
+    id: 2,
+    icon: '📞',
+    title: 'Report emergencies immediately',
+    description: 'If someone seems threatening or suspicious, contact the Philippine national emergency hotline right away.',
+    meta: 'Emergency hotline: 911',
+  },
+  {
+    id: 3,
+    icon: '🗺️',
+    title: 'Confirm the route before boarding',
+    description: 'Ask the driver or conductor for the exact stop sequence if the signage is unclear or the route is unfamiliar.',
+    meta: 'Avoid missed transfers',
+  },
+  {
+    id: 4,
+    icon: '👥',
+    title: 'Share your trip with someone you trust',
+    description: 'Send your route plan, arrival estimate, or live location to a family member or emergency contact for added safety.',
+    meta: 'Useful for late-night trips',
+  },
+];
 
 const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
+  const [activeTipIndex, setActiveTipIndex] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveTipIndex((current) => (current + 1) % commuterTips.length);
+    }, 4500);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -12,6 +52,8 @@ const Home = () => {
       navigate(`/search?start=${start}&destination=${destination}`);
     }
   };
+
+  const activeTip = commuterTips[activeTipIndex];
 
   return (
     <div className="screen-stack">
@@ -67,6 +109,39 @@ const Home = () => {
         </form>
       </div>
 
+      <div className="card card-soft glass-card safety-carousel-card">
+        <div className="row-between" style={{ marginBottom: '0.8rem' }}>
+          <div className="stack-sm" style={{ gap: '0.2rem' }}>
+            <h2 style={{ marginBottom: 0 }}>Commuter Tips &amp; Guide</h2>
+            <p className="muted-text" style={{ margin: 0, fontSize: '0.8rem' }}>
+              Safety reminders and quick guidance while you travel.
+            </p>
+          </div>
+          <span className="pill">{activeTipIndex + 1} / {commuterTips.length}</span>
+        </div>
+
+        <div className="carousel-panel" role="region" aria-label="Commuter safety tips carousel">
+          <div className="carousel-icon" aria-hidden="true">{activeTip.icon}</div>
+          <div className="stack-sm">
+            <strong className="carousel-title">{activeTip.title}</strong>
+            <p className="carousel-description">{activeTip.description}</p>
+            <span className="carousel-meta">{activeTip.meta}</span>
+          </div>
+        </div>
+
+        <div className="carousel-dots" aria-label="Choose a tip">
+          {commuterTips.map((tip, index) => (
+            <button
+              key={tip.id}
+              type="button"
+              className={`carousel-dot ${index === activeTipIndex ? 'active' : ''}`}
+              onClick={() => setActiveTipIndex(index)}
+              aria-label={`Show tip ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="inline-grid">
         <h2>Recent Community Routes</h2>
         <div className="card card-soft glass-card" onClick={() => navigate('/route/1')} style={{ cursor: 'pointer' }}>
@@ -99,7 +174,7 @@ const Home = () => {
         </div>
 
         <div className="card card-soft">
-          <h2 style={{ marginBottom: '0.6rem' }}>Tips n&apos; Tricks</h2>
+          <h2 style={{ marginBottom: '0.6rem' }}>Quick reminders</h2>
           <div className="tips-strip">
             <div className="tip-item">
               <span>💡</span>
@@ -113,13 +188,6 @@ const Home = () => {
               <div className="stack-sm">
                 <b>Use travel time windows</b>
                 <span>Rush hour can shift fare and route speed.</span>
-              </div>
-            </div>
-            <div className="tip-item">
-              <span>🛡️</span>
-              <div className="stack-sm">
-                <b>Trust verified guides</b>
-                <span>Community-vetted steps reduce missed transfers.</span>
               </div>
             </div>
           </div>

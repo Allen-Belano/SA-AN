@@ -18,8 +18,24 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+const ensureProfileColumns = async () => {
+  await pool.query(`
+    ALTER TABLE Users
+    ADD COLUMN IF NOT EXISTS bio TEXT,
+    ADD COLUMN IF NOT EXISTS home_location VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS preferred_transport VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS budget_level VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS travel_window VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS emergency_contact VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS avatar_color VARCHAR(50) DEFAULT '#f0932b'
+  `);
+};
+
 pool.connect()
-  .then(() => console.log('Connected to PostgreSQL database'))
+  .then(async () => {
+    console.log('Connected to PostgreSQL database');
+    await ensureProfileColumns();
+  })
   .catch(err => console.error('Database connection error:', err));
 
 // Share pool with routes by attaching it to req

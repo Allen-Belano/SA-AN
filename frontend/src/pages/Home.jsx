@@ -6,30 +6,41 @@ const commuterTips = [
     id: 1,
     icon: '🛡️',
     title: 'Stay alert in crowded terminals',
-    description: 'Keep your bag in front, avoid displaying cash, and move toward well-lit, populated pickup points.',
+    description: 'Keep your bag in front and use well-lit pickup points.',
     meta: 'Best for rush hour commutes',
   },
   {
     id: 2,
     icon: '📞',
     title: 'Report emergencies immediately',
-    description: 'If someone seems threatening or suspicious, contact the Philippine national emergency hotline right away.',
+    description: 'If something feels wrong, call 911 and move near station staff.',
     meta: 'Emergency hotline: 911',
   },
   {
     id: 3,
     icon: '🗺️',
     title: 'Confirm the route before boarding',
-    description: 'Ask the driver or conductor for the exact stop sequence if the signage is unclear or the route is unfamiliar.',
+    description: 'Ask the driver or conductor for the stop sequence before riding.',
     meta: 'Avoid missed transfers',
   },
-  {
-    id: 4,
-    icon: '👥',
-    title: 'Share your trip with someone you trust',
-    description: 'Send your route plan, arrival estimate, or live location to a family member or emergency contact for added safety.',
-    meta: 'Useful for late-night trips',
-  },
+];
+
+const travelModes = [
+  { id: 'jeepney', label: 'Jeepney', emoji: '🚐' },
+  { id: 'train', label: 'Train', emoji: '🚆' },
+  { id: 'bus', label: 'Bus', emoji: '🚌' },
+  { id: 'uv', label: 'UV', emoji: '🚖' },
+];
+
+const schedules = [
+  { id: 1, carrier: 'MRT-3 Northbound', route: 'TFT', to: 'QAV', time: '35 min', date: 'Peak hour' },
+  { id: 2, carrier: 'EDSA Carousel', route: 'AYL', to: 'SMN', time: '42 min', date: 'Community picked' },
+];
+
+const recommendations = [
+  { id: 1, title: 'Safer Night Routes', subtitle: 'Well-lit transfer points' },
+  { id: 2, title: 'Low Fare Picks', subtitle: 'Budget-first route combos' },
+  { id: 3, title: 'Fast Transfer Plans', subtitle: 'Less waiting, less walking' },
 ];
 
 const Home = () => {
@@ -56,70 +67,107 @@ const Home = () => {
   const activeTip = commuterTips[activeTipIndex];
 
   return (
-    <div className="screen-stack">
-      <div className="section-header">
-        <h1>SA/AN</h1>
-        <p>Community-powered commuter navigation.</p>
-      </div>
-
-      <div className="hero-card glass-card">
-        <div className="hero-content">
-          <span className="hero-chip">Daily Route Companion</span>
-          <p className="hero-text">
-            Faster route choices, fare awareness, and trusted community guides.
-          </p>
-          <div className="mini-stats">
-            <span className="pill">4.8 Community score</span>
-            <span className="pill">Live-friendly tips</span>
-          </div>
-        </div>
-        <div className="hero-illustration" aria-hidden="true">
-          <span className="shape shape-a"></span>
-          <span className="shape shape-b"></span>
-          <span className="shape shape-c"></span>
+    <div className="screen-stack home-screen">
+      <div className="dashboard-top">
+        <span className="points-pill">320 points</span>
+        <div className="quick-actions" aria-label="Quick actions">
+          <button type="button" className="round-icon" aria-label="Search">⌕</button>
+          <button type="button" className="round-icon" aria-label="Notifications">◌</button>
         </div>
       </div>
 
-      <div className="card card-soft">
-        <h2>Where to?</h2>
-        <form onSubmit={handleSearch}>
+      <div className="section-header" style={{ marginTop: 0 }}>
+        <h1>SA/AN Travel Made Effortless</h1>
+        <p>Community-powered commuter navigation for daily biyahe.</p>
+      </div>
+
+      <div className="transport-tabs">
+        {travelModes.map((mode) => (
+          <button key={mode.id} type="button" className="transport-tab">
+            <span className="mode-emoji" aria-hidden="true">{mode.emoji}</span>
+            <span>{mode.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="card card-soft trip-finder-card">
+        <div className="row-between" style={{ marginBottom: '0.65rem' }}>
+          <h2 style={{ margin: 0 }}>Find Your Best Route</h2>
+          <span className="finder-illustration" aria-hidden="true">🚄</span>
+        </div>
+
+        <div className="finder-tabs" aria-label="Trip type options">
+          <button type="button" className="finder-tab active">One Way</button>
+          <button type="button" className="finder-tab">Round Trip</button>
+        </div>
+
+        <form onSubmit={handleSearch} className="finder-form">
           <div className="input-group">
-            <label>Current Location / Start</label>
-            <input 
-              type="text" 
-              placeholder="e.g. EDSA Taft" 
+            <label>From</label>
+            <input
+              type="text"
+              placeholder="e.g. EDSA Taft"
               value={start}
               onChange={(e) => setStart(e.target.value)}
               required
             />
           </div>
           <div className="input-group">
-            <label>Destination</label>
-            <input 
-              type="text" 
-              placeholder="e.g. SM North EDSA" 
+            <label>To</label>
+            <input
+              type="text"
+              placeholder="e.g. SM North EDSA"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary">
-            Find Routes
+          <button type="submit" className="btn btn-jet">
+            Search
           </button>
         </form>
       </div>
 
-      <div className="card card-soft glass-card safety-carousel-card">
-        <div className="row-between" style={{ marginBottom: '0.8rem' }}>
-          <div className="stack-sm" style={{ gap: '0.2rem' }}>
-            <h2 style={{ marginBottom: 0 }}>Commuter Tips &amp; Guide</h2>
-            <p className="muted-text" style={{ margin: 0, fontSize: '0.8rem' }}>
-              Safety reminders and quick guidance while you travel.
-            </p>
-          </div>
-          <span className="pill">{activeTipIndex + 1} / {commuterTips.length}</span>
+      <div className="card card-soft">
+        <div className="row-between" style={{ marginBottom: '0.75rem' }}>
+          <h2 style={{ margin: 0 }}>Popular Route Schedules</h2>
+          <span className="link-pill">View all</span>
         </div>
 
+        <div className="ticket-list">
+          {schedules.map((item) => (
+            <div
+              key={item.id}
+              className="ticket-row"
+              onClick={() => navigate(`/route/${item.id}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  navigate(`/route/${item.id}`);
+                }
+              }}
+            >
+              <div className="ticket-main">
+                <strong>{item.carrier}</strong>
+                <span>{item.date}</span>
+              </div>
+              <div className="ticket-route">
+                <strong>{item.route}</strong>
+                <span>→</span>
+                <strong>{item.to}</strong>
+              </div>
+              <span className="ticket-time">{item.time}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card card-soft glass-card safety-carousel-card">
+        <div className="row-between" style={{ marginBottom: '0.8rem' }}>
+          <h2 style={{ marginBottom: 0 }}>Safety Tips</h2>
+          <span className="pill">{activeTipIndex + 1} / {commuterTips.length}</span>
+        </div>
         <div className="carousel-panel" role="region" aria-label="Commuter safety tips carousel">
           <div className="carousel-icon" aria-hidden="true">{activeTip.icon}</div>
           <div className="stack-sm">
@@ -143,54 +191,38 @@ const Home = () => {
       </div>
 
       <div className="inline-grid">
+        <div className="row-between" style={{ marginBottom: '-0.2rem' }}>
+          <h2>Recommendations</h2>
+          <span className="link-pill">View all</span>
+        </div>
+        <div className="recommend-grid">
+          {recommendations.map((item) => (
+            <article key={item.id} className="recommend-card">
+              <div className="recommend-visual" aria-hidden="true"></div>
+              <div className="recommend-copy">
+                <strong>{item.title}</strong>
+                <span>{item.subtitle}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="inline-grid">
         <h2>Recent Community Routes</h2>
         <div className="card card-soft glass-card" onClick={() => navigate('/route/1')} style={{ cursor: 'pointer' }}>
-          <div className="row-between" style={{ marginBottom: '0.75rem' }}>
-            <strong className="route-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              EDSA Taft 
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg> 
-              SM North EDSA
-            </strong>
-            <span className="vote-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> 
-              124
-            </span>
+          <div className="row-between" style={{ marginBottom: '0.65rem' }}>
+            <strong className="route-title">EDSA Taft → SM North EDSA</strong>
+            <span className="vote-badge">124 votes</span>
           </div>
           <p style={{ margin: 0, fontSize: '0.84rem' }}>Via MRT-3 • 35 mins • ₱28.00</p>
         </div>
         <div className="card card-soft" onClick={() => navigate('/route/2')} style={{ cursor: 'pointer' }}>
-          <div className="row-between" style={{ marginBottom: '0.75rem' }}>
-            <strong className="route-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              Ayala Triangle 
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg> 
-              BGC High Street
-            </strong>
-            <span className="vote-badge" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> 
-              89
-            </span>
+          <div className="row-between" style={{ marginBottom: '0.65rem' }}>
+            <strong className="route-title">Ayala Triangle → BGC High Street</strong>
+            <span className="vote-badge">89 votes</span>
           </div>
           <p style={{ margin: 0, fontSize: '0.84rem' }}>Via BGC Bus • 20 mins • ₱13.00</p>
-        </div>
-
-        <div className="card card-soft">
-          <h2 style={{ marginBottom: '0.6rem' }}>Quick reminders</h2>
-          <div className="tips-strip">
-            <div className="tip-item">
-              <span>💡</span>
-              <div className="stack-sm">
-                <b>Check one route first</b>
-                <span>Pick a clear plan before stacking alternatives.</span>
-              </div>
-            </div>
-            <div className="tip-item">
-              <span>⏱️</span>
-              <div className="stack-sm">
-                <b>Use travel time windows</b>
-                <span>Rush hour can shift fare and route speed.</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

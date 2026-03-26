@@ -1,0 +1,44 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#B8E6D8" opacity="0.8"/>
+  
+  <!-- Head -->
+  <ellipse cx="60" cy="48" rx="25" ry="30" fill="#D4A574"/>
+  
+  <!-- Face highlight -->
+  <ellipse cx="60" cy="42" rx="21" ry="26" fill="#E8C4A0" opacity="0.5"/>
+  
+  <!-- Left eye -->
+  <circle cx="51" cy="46" r="3" fill="#333"/>
+  <circle cx="51" cy="46" r="1.5" fill="#FFF" opacity="0.8"/>
+  
+  <!-- Right eye -->
+  <circle cx="69" cy="46" r="3" fill="#333"/>
+  <circle cx="69" cy="46" r="1.5" fill="#FFF" opacity="0.8"/>
+  
+  <!-- Nose -->
+  <line x1="60" y1="50" x2="60" y2="56" stroke="#C09070" stroke-width="1"/>
+  
+  <!-- Smile -->
+  <path d="M 51 60 Q 60 64 69 60" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Hair - styled differently -->
+  <path d="M 35 42 L 38 22 Q 60 15 82 22 L 85 42" fill="#2C1810"/>
+  <path d="M 40 38 Q 50 20 60 18 Q 70 20 80 38" fill="#3D2817" opacity="0.7"/>
+  
+  <!-- Neck -->
+  <rect x="53" y="75" width="14" height="12" fill="#D4A574"/>
+  
+  <!-- Shoulders with hard hat -->
+  <g>
+    <!-- Shoulders -->
+    <ellipse cx="60" cy="92" rx="30" ry="16" fill="#FF9800"/>
+    <ellipse cx="60" cy="90" rx="28" ry="6" fill="#FFB74D" opacity="0.7"/>
+    
+    <!-- Hard hat brim -->
+    <ellipse cx="60" cy="32" rx="32" ry="6" fill="#FFC107"/>
+    
+    <!-- Hard hat dome -->
+    <path d="M 35 32 Q 35 15 60 12 Q 85 15 85 32" fill="#FFD54F" stroke="#FBC02D" stroke-width="1"/>
+  </g>
+</svg>

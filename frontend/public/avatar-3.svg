@@ -1,0 +1,40 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#E8D5F2" opacity="0.8"/>
+  
+  <!-- Head -->
+  <ellipse cx="60" cy="50" rx="24" ry="28" fill="#E8B4D4"/>
+  
+  <!-- Face highlight -->
+  <ellipse cx="60" cy="44" rx="20" ry="24" fill="#F0CDD8" opacity="0.6"/>
+  
+  <!-- Left eye -->
+  <circle cx="52" cy="48" r="3.5" fill="#333"/>
+  <circle cx="52" cy="48" r="1.5" fill="#FFF" opacity="0.8"/>
+  
+  <!-- Right eye -->
+  <circle cx="68" cy="48" r="3.5" fill="#333"/>
+  <circle cx="68" cy="48" r="1.5" fill="#FFF" opacity="0.8"/>
+  
+  <!-- Smile (cheerful) -->
+  <path d="M 50 59 Q 60 64 70 59" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Cheeks -->
+  <circle cx="42" cy="54" r="4" fill="#F4A4BE" opacity="0.5"/>
+  <circle cx="78" cy="54" r="4" fill="#F4A4BE" opacity="0.5"/>
+  
+  <!-- Hair -->
+  <path d="M 36 42 Q 36 18 60 15 Q 84 18 84 42" fill="#8B3A62"/>
+  <path d="M 40 38 Q 48 20 60 18 Q 72 20 80 38" fill="#A0466D" opacity="0.7"/>
+  
+  <!-- Hair strands -->
+  <path d="M 50 18 Q 45 12 42 18" fill="#8B3A62" opacity="0.5"/>
+  <path d="M 70 18 Q 75 12 78 18" fill="#8B3A62" opacity="0.5"/>
+  
+  <!-- Neck -->
+  <rect x="52" y="74" width="16" height="12" fill="#E8B4D4"/>
+  
+  <!-- Shoulders/shirt -->
+  <ellipse cx="60" cy="92" rx="28" ry="18" fill="#6A5ACD"/>
+  <ellipse cx="60" cy="90" rx="26" ry="8" fill="#8A7FBF" opacity="0.7"/>
+</svg>

@@ -1,49 +1,88 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import RouteTrackerMap from '../components/RouteTrackerMap';
 
 const RouteGuide = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock route data
-  const route = {
-    id: 1,
-    start: "EDSA Taft",
-    destination: "SM North EDSA",
-    time: "45 mins",
-    totalFare: "₱28.00",
-    votes: 124,
-    steps: [
-      {
-        id: 1,
-        instruction: "Walk to MRT-3 Taft Avenue Station entrance.",
-        vehicle: "Walk",
-        fare: null,
-        icon: "🚶‍♂️"
-      },
-      {
-        id: 2,
-        instruction: "Board the Northbound train. Ride for 12 stations.",
-        vehicle: "MRT-3",
-        fare: "₱28.00 (Regular) | ₱22.00 (Discounted)",
-        icon: "🚆"
-      },
-      {
-        id: 3,
-        instruction: "Alight at North Avenue Station.",
-        vehicle: "Drop-off",
-        fare: null,
-        icon: "📍"
-      },
-      {
-        id: 4,
-        instruction: "Walk through Trinoma connection bridge until you reach SM North EDSA.",
-        vehicle: "Walk",
-        fare: null,
-        icon: "🚶‍♀️"
-      }
-    ]
+  const routes = {
+    1: {
+      id: 1,
+      start: 'EDSA Taft',
+      destination: 'SM North EDSA',
+      time: '45 mins',
+      totalFare: '₱28.00',
+      votes: 124,
+      startCoords: [14.5378, 121.0014],
+      destinationCoords: [14.6565, 121.0311],
+      steps: [
+        {
+          id: 1,
+          instruction: 'Walk to MRT-3 Taft Avenue Station entrance.',
+          vehicle: 'Walk',
+          fare: null,
+          icon: '🚶‍♂️'
+        },
+        {
+          id: 2,
+          instruction: 'Board the Northbound train. Ride for 12 stations.',
+          vehicle: 'MRT-3',
+          fare: '₱28.00 (Regular) | ₱22.00 (Discounted)',
+          icon: '🚆'
+        },
+        {
+          id: 3,
+          instruction: 'Alight at North Avenue Station.',
+          vehicle: 'Drop-off',
+          fare: null,
+          icon: '📍'
+        },
+        {
+          id: 4,
+          instruction: 'Walk through Trinoma connection bridge until you reach SM North EDSA.',
+          vehicle: 'Walk',
+          fare: null,
+          icon: '🚶‍♀️'
+        }
+      ]
+    },
+    2: {
+      id: 2,
+      start: 'Ayala Triangle',
+      destination: 'BGC High Street',
+      time: '20 mins',
+      totalFare: '₱13.00',
+      votes: 89,
+      startCoords: [14.5560, 121.0230],
+      destinationCoords: [14.5492, 121.0543],
+      steps: [
+        {
+          id: 1,
+          instruction: 'Walk to the nearest BGC Bus stop in Ayala.',
+          vehicle: 'Walk',
+          fare: null,
+          icon: '🚶‍♂️'
+        },
+        {
+          id: 2,
+          instruction: 'Board the East Route bus and stay until High Street stop.',
+          vehicle: 'BGC Bus',
+          fare: '₱13.00',
+          icon: '🚌'
+        },
+        {
+          id: 3,
+          instruction: 'Walk 3-5 minutes to your destination block.',
+          vehicle: 'Walk',
+          fare: null,
+          icon: '📍'
+        }
+      ]
+    }
   };
+
+  const route = routes[id] || routes[1];
 
   const [activeTab, setActiveTab] = useState('steps');
 
@@ -120,13 +159,12 @@ const RouteGuide = () => {
           </div>
         </div>
       ) : (
-        <div className="card card-soft glass-card" style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem', animation: 'floatY 4.5s ease-in-out infinite' }}>🗺️</div>
-          <h3 style={{ marginBottom: '0.4rem' }}>Map Render Space</h3>
-          <p style={{ textAlign: 'center' }}>Integration with Mapbox or Google Maps goes here.</p>
-          <button className="btn btn-primary" style={{ width: 'auto', marginTop: '1rem' }}>
-            Start Navigation
-          </button>
+        <div className="card card-soft glass-card">
+          <h3 style={{ marginBottom: '0.45rem' }}>Live Route Tracker</h3>
+          <p style={{ marginBottom: '0.85rem', fontSize: '0.82rem' }}>
+            Follow your live location against the suggested route path.
+          </p>
+          <RouteTrackerMap start={route.startCoords} destination={route.destinationCoords} />
         </div>
       )}
     </div>

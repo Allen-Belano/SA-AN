@@ -192,6 +192,14 @@ const Profile = () => {
         <button type="button" className="btn btn-secondary" onClick={handleSave}>
           {saving ? 'Saving...' : 'Quick Save Profile'}
         </button>
+        <button
+          type="button"
+          className="btn"
+          onClick={handleLogout}
+          style={{ background: '#11151e', color: '#f5f8ff' }}
+        >
+          Logout
+        </button>
       </div>
 
       {loading ? (

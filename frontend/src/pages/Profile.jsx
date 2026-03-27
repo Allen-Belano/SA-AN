@@ -51,7 +51,7 @@ const defaultProfile = {
 
 const colorOptions = ['#f0932b', '#40b285', '#e57f84', '#7a9ef8'];
 
-const Profile = () => {
+const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState(setupItems[0].id);
   const [session, setSession] = useState(() => getStoredSession());
@@ -186,20 +186,21 @@ const Profile = () => {
       </div>
 
       <div className="card card-soft profile-actions">
-        <button type="button" className="btn btn-primary">
+        <div className="profile-signed-in" role="status" aria-live="polite">
           Signed in as {profile.name || session?.user?.name || 'Commuter'}
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={handleSave}>
-          {saving ? 'Saving...' : 'Quick Save Profile'}
-        </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={handleLogout}
-          style={{ background: '#11151e', color: '#f5f8ff' }}
-        >
-          Logout
-        </button>
+        </div>
+        <div className="profile-action-row">
+          <button type="button" className="btn btn-secondary profile-action-btn" onClick={handleSave}>
+            {saving ? 'Saving...' : 'Quick Save'}
+          </button>
+          <button
+            type="button"
+            className="btn profile-action-btn profile-logout-btn"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -367,6 +368,14 @@ const Profile = () => {
             <span className="setup-label">Security</span>
             <strong>{session?.token ? 'Session active' : 'Login not connected'}</strong>
             <p>{session?.token ? 'Your current session can update profile data through the backend API.' : 'Sign in to persist your profile and keep saved routes synced.'}</p>
+          </div>
+          <div className="setup-block">
+            <span className="setup-label">Appearance</span>
+            <strong>Theme: {theme === 'dark' ? 'Dark mode' : 'Light mode'}</strong>
+            <p>Switch app theme for better comfort in day or night commuting.</p>
+            <button type="button" className="btn btn-secondary profile-theme-btn" onClick={onToggleTheme}>
+              Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
+            </button>
           </div>
         </div>
       </div>

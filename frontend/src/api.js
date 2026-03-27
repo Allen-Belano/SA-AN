@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const defaultApiBaseUrl = `http://${window.location.hostname}:5000/api`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || defaultApiBaseUrl,
 });
 
 const AUTH_STORAGE_KEY = 'saan-auth-session';

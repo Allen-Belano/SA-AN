@@ -62,6 +62,18 @@ const RouteSearch = () => {
     }, 800);
   };
 
+  const handleSwapLocations = () => {
+    setStart((currentStart) => {
+      const nextStart = destination;
+      setDestination(currentStart);
+      return nextStart;
+    });
+
+    if (start && destination) {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="screen-stack">
       <div className="row-between search-toolbar">
@@ -80,13 +92,27 @@ const RouteSearch = () => {
       </div>
 
       <div className="route-pill-row" aria-label="Current route query">
-        <span className="route-pill"><small>From</small>{start || 'EDSA Taft'}</span>
-        <span className="route-pill center">↔</span>
-        <span className="route-pill"><small>To</small>{destination || 'SM North EDSA'}</span>
+        <span className="route-pill">
+          <small>From</small>
+          <b>{start || 'EDSA Taft'}</b>
+        </span>
+        <button
+          type="button"
+          className="route-pill-swap"
+          onClick={handleSwapLocations}
+          aria-label="Swap from and to locations"
+          title="Swap locations"
+        >
+          ↔
+        </button>
+        <span className="route-pill">
+          <small>To</small>
+          <b>{destination || 'SM North EDSA'}</b>
+        </span>
       </div>
 
       <div className="card card-soft glass-card">
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} className="route-search-form">
           <div className="input-group">
             <label>From</label>
             <input 
@@ -97,7 +123,7 @@ const RouteSearch = () => {
               required
             />
           </div>
-          <div className="input-group" style={{ marginBottom: 0 }}>
+          <div className="input-group route-to-group">
             <label>To</label>
             <input 
               type="text" 
@@ -107,7 +133,7 @@ const RouteSearch = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-jet">
+          <button type="submit" className="btn btn-jet route-search-submit">
             Update Search
           </button>
         </form>

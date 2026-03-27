@@ -6,7 +6,19 @@ import RouteGuide from './pages/RouteGuide';
 import Contribute from './pages/Contribute';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import CommuterGuideChatbot from './components/CommuterGuideChatbot';
 import { getStoredSession } from './api';
+
+const THEME_STORAGE_KEY = 'saan-theme';
+
+const getInitialTheme = () => {
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    return savedTheme;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
 
 const introLines = [
   'For every daily biyahe.',
@@ -67,7 +79,7 @@ const PublicOnlyRoute = () => {
   return <Login />;
 };
 
-const AppLayout = () => {
+const AppLayout = ({ theme, onToggleTheme }) => {
   const location = useLocation();
   const hideNavigation = location.pathname === '/login';
 
@@ -86,11 +98,12 @@ const AppLayout = () => {
             <Route path="/search" element={<RouteSearch />} />
             <Route path="/route/:id" element={<RouteGuide />} />
             <Route path="/contribute" element={<Contribute />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile theme={theme} onToggleTheme={onToggleTheme} />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      {!hideNavigation && <CommuterGuideChatbot />}
       {!hideNavigation && <BottomNav />}
     </div>
   );
@@ -155,6 +168,12 @@ const IntroScreen = () => {
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     const introTimer = window.setTimeout(() => {
@@ -170,7 +189,10 @@ function App() {
 
   return (
     <Router>
-      <AppLayout />
+      <AppLayout
+        theme={theme}
+        onToggleTheme={() => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))}
+      />
     </Router>
   );
 }

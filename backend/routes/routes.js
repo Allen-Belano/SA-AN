@@ -1,5 +1,61 @@
 const express = require('express');
+const fs = require('fs');
+const multer = require('multer');
+const path = require('path');
 const router = express.Router();
+
+const uploadsDir = path.join(__dirname, '..', 'uploads', 'route-steps');
+fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (_req, _file, cb) => {
+        cb(null, uploadsDir);
+    },
+    filename: (_req, file, cb) => {
+        const extension = path.extname(file.originalname || '').toLowerCase();
+        const safeExtension = extension || (file.mimetype.startsWith('video/') ? '.mp4' : '.jpg');
+        cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExtension}`);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 25 * 1024 * 1024,
+    },
+    fileFilter: (_req, file, cb) => {
+        const isImage = file.mimetype.startsWith('image/');
+        const isVideo = file.mimetype.startsWith('video/');
+
+        if (!isImage && !isVideo) {
+            cb(new Error('Only image or video files are allowed.'));
+            return;
+        }
+
+        cb(null, true);
+    }
+});
+
+router.post('/media', (req, res) => {
+    upload.single('media')(req, res, (error) => {
+        if (error) {
+            return res.status(400).json({ error: error.message || 'Unable to upload media file' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Media file is required' });
+        }
+
+        const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'photo';
+        const relativeUrl = `/uploads/route-steps/${req.file.filename}`;
+        const mediaUrl = `${req.protocol}://${req.get('host')}${relativeUrl}`;
+
+        return res.status(201).json({
+            media_url: mediaUrl,
+            media_type: mediaType,
+        });
+    });
+});
 
 // Get all routes or search
 router.get('/', async (req, res) => {
@@ -73,7 +129,17 @@ router.post('/', async (req, res) => {
             for (let i = 0; i < steps.length; i++) {
                 const step = steps[i];
                 await pool.query(
-                    'INSERT INTO RouteSteps (route_id, step_order, instruction, vehicle_type, fare_regular, fare_discount, stop_location, photo_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+                    `INSERT INTO RouteSteps (
+                        route_id,
+                        step_order,
+                        instruction,
+                        vehicle_type,
+                        fare_regular,
+                        fare_discount,
+                        stop_location,
+                        photo_url,
+                        video_url
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
                     [
                         routeId, 
                         i + 1, 
@@ -82,7 +148,8 @@ router.post('/', async (req, res) => {
                         step.fare_regular, 
                         step.fare_discount, 
                         step.stop_location, 
-                        step.photo_url || null
+                        step.photo_url || null,
+                        step.video_url || null
                     ]
                 );
             }

@@ -32,7 +32,8 @@ CREATE TABLE RouteSteps (
     fare_regular DECIMAL(10, 2),
     fare_discount DECIMAL(10, 2),
     stop_location VARCHAR(255),
-    photo_url VARCHAR(255)
+    photo_url VARCHAR(255),
+    video_url VARCHAR(255)
 );
 
 CREATE TABLE Updates (

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -8,6 +9,7 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Set up postgres pool
 const pool = new Pool({
@@ -31,10 +33,19 @@ const ensureProfileColumns = async () => {
   `);
 };
 
+const ensureRouteStepMediaColumns = async () => {
+  await pool.query(`
+    ALTER TABLE RouteSteps
+    ADD COLUMN IF NOT EXISTS photo_url VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS video_url VARCHAR(255)
+  `);
+};
+
 pool.connect()
   .then(async () => {
     console.log('Connected to PostgreSQL database');
     await ensureProfileColumns();
+    await ensureRouteStepMediaColumns();
   })
   .catch(err => console.error('Database connection error:', err));
 

@@ -1,14 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createRoute, getApiErrorMessage, getStoredSession, uploadRouteStepMedia } from '../api';
+
+const createEmptyStep = (id) => ({
+  id,
+  instruction: '',
+  vehicle_type: '',
+  fare_regular: '',
+  fare_discount: '',
+  stop_location: '',
+  photo_url: '',
+  video_url: '',
+  isUploading: false,
+});
 
 const Contribute = () => {
   const navigate = useNavigate();
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
-  const [steps, setSteps] = useState([{ id: 1, instruction: '', vehicle: '', fare: '' }]);
+  const [steps, setSteps] = useState([createEmptyStep(1)]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const addStep = () => {
-    setSteps([...steps, { id: steps.length + 1, instruction: '', vehicle: '', fare: '' }]);
+    setSteps((current) => [...current, createEmptyStep(current.length + 1)]);
   };
 
   const removeStep = (index) => {
@@ -23,10 +38,109 @@ const Contribute = () => {
     setSteps(newSteps);
   };
 
-  const handleSubmit = (e) => {
+  const handleStepMediaUpload = async (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    setErrorMessage('');
+
+    setSteps((current) => current.map((step, currentIndex) => {
+      if (currentIndex !== index) {
+        return step;
+      }
+
+      return {
+        ...step,
+        isUploading: true,
+      };
+    }));
+
+    try {
+      const response = await uploadRouteStepMedia(file);
+
+      setSteps((current) => current.map((step, currentIndex) => {
+        if (currentIndex !== index) {
+          return step;
+        }
+
+        const isVideo = response.media_type === 'video';
+
+        return {
+          ...step,
+          isUploading: false,
+          photo_url: isVideo ? '' : response.media_url,
+          video_url: isVideo ? response.media_url : '',
+        };
+      }));
+    } catch (error) {
+      setSteps((current) => current.map((step, currentIndex) => {
+        if (currentIndex !== index) {
+          return step;
+        }
+
+        return {
+          ...step,
+          isUploading: false,
+        };
+      }));
+
+      setErrorMessage(getApiErrorMessage(error, 'Unable to upload media. Please try again.'));
+    }
+  };
+
+  const mapFare = (value) => {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Route submitted for community review! Thank you for contributing.');
-    navigate('/');
+    setErrorMessage('');
+
+    const session = getStoredSession();
+
+    if (!session?.user?.user_id) {
+      setErrorMessage('Please sign in before submitting a route.');
+      navigate('/login');
+      return;
+    }
+
+    if (steps.some((step) => step.isUploading)) {
+      setErrorMessage('Please wait for all media uploads to finish.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        start_location: start.trim(),
+        destination: destination.trim(),
+        created_by: session.user.user_id,
+        steps: steps.map((step) => ({
+          instruction: step.instruction.trim(),
+          vehicle_type: step.vehicle_type || null,
+          fare_regular: mapFare(step.fare_regular),
+          fare_discount: mapFare(step.fare_discount),
+          stop_location: step.stop_location.trim() || null,
+          photo_url: step.photo_url || null,
+          video_url: step.video_url || null,
+        })),
+      };
+
+      const result = await createRoute(payload);
+      alert('Route submitted successfully! Thank you for helping fellow commuters.');
+      navigate(`/route/${result.route_id}`);
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, 'Unable to publish route. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -85,8 +199,8 @@ const Contribute = () => {
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
                   <select 
-                    value={step.vehicle} 
-                    onChange={(e) => handleStepChange(index, 'vehicle', e.target.value)}
+                    value={step.vehicle_type} 
+                    onChange={(e) => handleStepChange(index, 'vehicle_type', e.target.value)}
                     required
                   >
                     <option value="">Vehicle Type</option>
@@ -100,15 +214,114 @@ const Contribute = () => {
                 </div>
                 <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
                   <input 
-                    type="text" 
+                    type="number"
+                    min="0"
+                    step="0.01"
                     placeholder="Regular Fare" 
-                    value={step.fare}
-                    onChange={(e) => handleStepChange(index, 'fare', e.target.value)}
+                    value={step.fare_regular}
+                    onChange={(e) => handleStepChange(index, 'fare_regular', e.target.value)}
                   />
                 </div>
               </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input 
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Discounted Fare" 
+                    value={step.fare_discount}
+                    onChange={(e) => handleStepChange(index, 'fare_discount', e.target.value)}
+                  />
+                </div>
+                <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
+                  <input 
+                    type="text"
+                    placeholder="Stop / Landmark"
+                    value={step.stop_location}
+                    onChange={(e) => handleStepChange(index, 'stop_location', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group" style={{ marginTop: '0.6rem', marginBottom: 0 }}>
+                <label style={{ marginBottom: '0.45rem' }}>Step Visual (Photo or Short Video)</label>
+
+                <div className="step-media-picker">
+                  <input
+                    id={`step-media-${index}`}
+                    className="step-media-input"
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={(e) => {
+                      const [file] = e.target.files || [];
+                      handleStepMediaUpload(index, file);
+                      e.target.value = '';
+                    }}
+                  />
+
+                  <label htmlFor={`step-media-${index}`} className="step-media-button">
+                    <span aria-hidden="true">⬆</span>
+                    <span>{step.photo_url || step.video_url ? 'Replace Photo/Video' : 'Add Photo or Short Video'}</span>
+                  </label>
+
+                  {step.photo_url && (
+                    <span className="step-media-chip">Photo selected</span>
+                  )}
+
+                  {step.video_url && (
+                    <span className="step-media-chip">Video selected</span>
+                  )}
+
+                  {(step.photo_url || step.video_url) && (
+                    <button
+                      type="button"
+                      className="step-media-clear"
+                      onClick={() => {
+                        handleStepChange(index, 'photo_url', '');
+                        handleStepChange(index, 'video_url', '');
+                      }}
+                    >
+                      Remove media
+                    </button>
+                  )}
+                </div>
+
+                <p style={{ marginTop: '0.35rem', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                  Supported: images and short videos (max 25MB).
+                </p>
+              </div>
+
+              {step.isUploading && (
+                <p style={{ marginTop: '0.45rem', fontSize: '0.8rem', color: 'var(--secondary-color)' }}>
+                  Uploading media...
+                </p>
+              )}
+
+              {step.photo_url && (
+                <img
+                  src={step.photo_url}
+                  alt={`Step ${index + 1} visual`}
+                  style={{ width: '100%', borderRadius: '12px', marginTop: '0.55rem', maxHeight: '170px', objectFit: 'cover' }}
+                />
+              )}
+
+              {step.video_url && (
+                <video
+                  controls
+                  src={step.video_url}
+                  style={{ width: '100%', borderRadius: '12px', marginTop: '0.55rem', maxHeight: '210px', background: '#000' }}
+                />
+              )}
             </div>
           ))}
+
+          {errorMessage && (
+            <p className="form-message error-message" style={{ marginBottom: '0.9rem' }}>
+              {errorMessage}
+            </p>
+          )}
 
           <button 
             type="button" 
@@ -128,8 +341,8 @@ const Contribute = () => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-secondary">
-            Publish Route
+          <button type="submit" className="btn btn-secondary" disabled={isSubmitting}>
+            {isSubmitting ? 'Publishing...' : 'Publish Route'}
           </button>
         </form>
       </div>

@@ -55,6 +55,34 @@ export const updateCurrentUser = async (token, payload) => {
   return response.data;
 };
 
+export const getRoutes = async (params = {}) => {
+  const response = await api.get('/routes', { params });
+  return response.data;
+};
+
+export const getRouteById = async (routeId) => {
+  const response = await api.get(`/routes/${routeId}`);
+  return response.data;
+};
+
+export const createRoute = async (payload) => {
+  const response = await api.post('/routes', payload);
+  return response.data;
+};
+
+export const uploadRouteStepMedia = async (file) => {
+  const formData = new FormData();
+  formData.append('media', file);
+
+  const response = await api.post('/routes/media', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
 export const getApiErrorMessage = (error, fallbackMessage) => {
   return error?.response?.data?.error || fallbackMessage;
 };

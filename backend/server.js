@@ -41,11 +41,21 @@ const ensureRouteStepMediaColumns = async () => {
   `);
 };
 
+const ensureUpdatesColumns = async () => {
+  await pool.query(`
+    ALTER TABLE Updates
+    ADD COLUMN IF NOT EXISTS title VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS category VARCHAR(80),
+    ADD COLUMN IF NOT EXISTS location VARCHAR(255)
+  `);
+};
+
 pool.connect()
   .then(async () => {
     console.log('Connected to PostgreSQL database');
     await ensureProfileColumns();
     await ensureRouteStepMediaColumns();
+    await ensureUpdatesColumns();
   })
   .catch(err => console.error('Database connection error:', err));
 
@@ -58,9 +68,11 @@ app.use((req, res, next) => {
 // Import route modules
 const userRoutes = require('./routes/users');
 const routeRoutes = require('./routes/routes');
+const updatesRoutes = require('./routes/updates');
 
 app.use('/api/users', userRoutes);
 app.use('/api/routes', routeRoutes);
+app.use('/api/updates', updatesRoutes);
 
 app.get('/', (req, res) => {
   res.send('SA/AN API is running');

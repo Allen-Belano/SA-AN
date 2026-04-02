@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import RouteSearch from './pages/RouteSearch';
 import RouteGuide from './pages/RouteGuide';
 import Contribute from './pages/Contribute';
+import Community from './pages/Community';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import CommuterGuideChatbot from './components/CommuterGuideChatbot';
@@ -48,6 +49,12 @@ const BottomNav = () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </div>
         Contribute
+      </Link>
+      <Link to="/community" className={isActive('/community')}>
+        <div className="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        Community
       </Link>
       <Link to="/profile" className={isActive('/profile')}>
         <div className="nav-icon">
@@ -98,6 +105,7 @@ const AppLayout = ({ theme, onToggleTheme }) => {
             <Route path="/search" element={<RouteSearch />} />
             <Route path="/route/:id" element={<RouteGuide />} />
             <Route path="/contribute" element={<Contribute />} />
+            <Route path="/community" element={<Community />} />
             <Route path="/profile" element={<Profile theme={theme} onToggleTheme={onToggleTheme} />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

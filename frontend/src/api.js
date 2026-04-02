@@ -83,6 +83,16 @@ export const uploadRouteStepMedia = async (file) => {
   return response.data;
 };
 
+export const getCommunityUpdates = async (params = {}) => {
+  const response = await api.get('/updates', { params });
+  return response.data;
+};
+
+export const createCommunityUpdate = async (payload) => {
+  const response = await api.post('/updates', payload);
+  return response.data;
+};
+
 export const getApiErrorMessage = (error, fallbackMessage) => {
   return error?.response?.data?.error || fallbackMessage;
 };

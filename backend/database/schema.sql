@@ -40,6 +40,9 @@ CREATE TABLE Updates (
     update_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(user_id),
     route_id INT REFERENCES Routes(route_id) ON DELETE CASCADE,
+    title VARCHAR(255),
+    category VARCHAR(80),
+    location VARCHAR(255),
     message TEXT NOT NULL,
     photo_url VARCHAR(255),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP

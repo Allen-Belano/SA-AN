@@ -139,14 +139,29 @@ const RouteGuide = () => {
       </div>
 
       <div className="card route-summary">
-        <div className="row-between" style={{ marginBottom: '0.9rem' }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'white' }}>Community Route</h2>
-            <p style={{ margin: 0, color: 'rgba(255,255,255,0.8)' }}>Total Fare: {totalFare}</p>
+        <div className="route-summary-map" aria-hidden="true">
+          <span className="route-chip">{route.vehicle_type || 'Route'}</span>
+          <span className="route-chip route-chip-light">Stop 08</span>
+        </div>
+
+        <div className="route-summary-card">
+          <span className="route-kicker">Arrival Status</span>
+          <div className="row-between" style={{ alignItems: 'flex-end' }}>
+            <h2 style={{ margin: 0, fontSize: '1.42rem' }}>Arriving in 6 mins</h2>
+            <div className="summary-votes">
+              <span style={{ display: 'block', fontSize: '1rem' }}>{votes}</span>
+              <span style={{ fontSize: '0.69rem' }}>helpful</span>
+            </div>
           </div>
-          <div className="summary-votes">
-            <span style={{ display: 'block', fontSize: '1.25rem' }}>👍 {votes}</span>
-            <span style={{ fontSize: '0.75rem' }}>Helpful</span>
+          <p style={{ margin: '0.22rem 0 0.58rem' }}>2 stops away • Fare {totalFare}</p>
+
+          <div className="route-progress" role="presentation">
+            <span></span>
+          </div>
+
+          <div className="row-between" style={{ marginTop: '0.5rem' }}>
+            <span className="service-pill">Service is running on time</span>
+            <span className="muted-text" style={{ fontSize: '0.74rem' }}>78% complete</span>
           </div>
         </div>
 

@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  addCommunityComment,
   createCommunityUpdate,
+  getCommunityComments,
   getApiErrorMessage,
   getCommunityUpdates,
   getStoredSession,
+  reactToCommunityUpdate,
 } from '../api';
 
 const categoryOptions = [
@@ -23,6 +26,8 @@ const createInitialForm = () => ({
   location: '',
   message: '',
   photo_url: '',
+  severity: 'medium',
+  is_urgent: false,
 });
 
 const formatPostedAt = (timestamp) => {
@@ -59,26 +64,34 @@ const Community = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [postError, setPostError] = useState('');
+  const [filters, setFilters] = useState({ urgentOnly: false, category: '', location: '' });
+  const [expandedComments, setExpandedComments] = useState({});
+  const [commentDrafts, setCommentDrafts] = useState({});
 
   const session = useMemo(() => getStoredSession(), []);
 
-  const loadUpdates = async () => {
+  const loadUpdates = useCallback(async () => {
     setLoading(true);
     setErrorMessage('');
 
     try {
-      const response = await getCommunityUpdates({ limit: 50 });
+      const response = await getCommunityUpdates({
+        limit: 50,
+        urgent: filters.urgentOnly,
+        category: filters.category || undefined,
+        location: filters.location || undefined,
+      });
       setUpdates(response.updates || []);
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Unable to load community feed right now.'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     loadUpdates();
-  }, []);
+  }, [loadUpdates]);
 
   const handleFormChange = (field, value) => {
     setForm((current) => ({
@@ -108,6 +121,8 @@ const Community = () => {
         location: form.location,
         message: form.message,
         photo_url: form.photo_url,
+        severity: form.severity,
+        is_urgent: form.is_urgent,
       };
 
       const response = await createCommunityUpdate(payload);
@@ -171,6 +186,31 @@ const Community = () => {
             </div>
           </div>
 
+          <div className="community-form-grid">
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Severity</label>
+              <select
+                value={form.severity}
+                onChange={(event) => handleFormChange('severity', event.target.value)}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div className="input-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'end' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', marginBottom: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={form.is_urgent}
+                  onChange={(event) => handleFormChange('is_urgent', event.target.checked)}
+                  style={{ width: 'auto' }}
+                />
+                Mark as urgent
+              </label>
+            </div>
+          </div>
+
           <div className="input-group">
             <label>Details</label>
             <textarea
@@ -211,6 +251,38 @@ const Community = () => {
         </button>
       </div>
 
+      <div className="card card-soft" style={{ marginBottom: '0.1rem' }}>
+        <div className="community-form-grid">
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Category Filter</label>
+            <select value={filters.category} onChange={(event) => setFilters((current) => ({ ...current, category: event.target.value }))}>
+              <option value="">All categories</option>
+              {categoryOptions.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Location Filter</label>
+            <input
+              value={filters.location}
+              onChange={(event) => setFilters((current) => ({ ...current, location: event.target.value }))}
+              placeholder="Search area"
+            />
+          </div>
+        </div>
+
+        <label style={{ display: 'inline-flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.6rem', fontSize: '0.83rem' }}>
+          <input
+            type="checkbox"
+            checked={filters.urgentOnly}
+            onChange={(event) => setFilters((current) => ({ ...current, urgentOnly: event.target.checked }))}
+            style={{ width: 'auto' }}
+          />
+          Show urgent alerts only
+        </label>
+      </div>
+
       {loading ? (
         <div className="card card-soft" style={{ textAlign: 'center' }}>
           Loading community feed...
@@ -241,6 +313,7 @@ const Community = () => {
               <div className="community-meta-row">
                 <span className="community-category-pill">{update.category || 'General'}</span>
                 {update.location && <span className="community-location">{update.location}</span>}
+                {update.is_urgent && <span className="community-category-pill" style={{ background: 'rgba(215, 70, 85, 0.2)', color: 'var(--danger)' }}>Urgent</span>}
               </div>
 
               <h3 style={{ margin: '0.4rem 0 0.35rem' }}>{update.title || 'Community Update'}</h3>
@@ -252,6 +325,120 @@ const Community = () => {
                   src={update.photo_url}
                   alt="Community update attachment"
                 />
+              )}
+
+              <div style={{ display: 'flex', gap: '0.55rem', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ padding: '0.45rem 0.7rem', fontSize: '0.78rem' }}
+                  onClick={async () => {
+                    if (!session?.user?.user_id) {
+                      setPostError('Please sign in before reacting to posts.');
+                      return;
+                    }
+
+                    try {
+                      const response = await reactToCommunityUpdate(update.update_id, {
+                        user_id: session.user.user_id,
+                        reaction_type: 'helpful',
+                      });
+
+                      setUpdates((current) => current.map((item) => (
+                        item.update_id === update.update_id
+                          ? { ...item, reaction_count: response.reaction_count }
+                          : item
+                      )));
+                    } catch (error) {
+                      setPostError(getApiErrorMessage(error, 'Unable to react right now.'));
+                    }
+                  }}
+                >
+                  Helpful ({update.reaction_count || 0})
+                </button>
+
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ padding: '0.45rem 0.7rem', fontSize: '0.78rem' }}
+                  onClick={async () => {
+                    const isOpen = Boolean(expandedComments[update.update_id]);
+                    if (isOpen) {
+                      setExpandedComments((current) => ({ ...current, [update.update_id]: undefined }));
+                      return;
+                    }
+
+                    try {
+                      const response = await getCommunityComments(update.update_id);
+                      setExpandedComments((current) => ({ ...current, [update.update_id]: response.comments || [] }));
+                    } catch (error) {
+                      setPostError(getApiErrorMessage(error, 'Unable to load comments.'));
+                    }
+                  }}
+                >
+                  Comments ({update.comment_count || 0})
+                </button>
+              </div>
+
+              {expandedComments[update.update_id] && (
+                <div className="card card-soft" style={{ marginTop: '0.65rem', marginBottom: 0, padding: '0.65rem' }}>
+                  {expandedComments[update.update_id].map((comment) => (
+                    <p key={comment.comment_id} style={{ margin: '0 0 0.3rem', fontSize: '0.78rem' }}>
+                      <strong>{comment.author_name}:</strong> {comment.comment}
+                    </p>
+                  ))}
+
+                  <div style={{ display: 'flex', gap: '0.45rem', marginTop: '0.55rem' }}>
+                    <input
+                      value={commentDrafts[update.update_id] || ''}
+                      placeholder="Write a comment"
+                      onChange={(event) => setCommentDrafts((current) => ({
+                        ...current,
+                        [update.update_id]: event.target.value,
+                      }))}
+                    />
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ width: 'auto', padding: '0.45rem 0.75rem' }}
+                      onClick={async () => {
+                        if (!session?.user?.user_id) {
+                          setPostError('Please sign in before commenting.');
+                          return;
+                        }
+
+                        const draft = (commentDrafts[update.update_id] || '').trim();
+                        if (!draft) {
+                          return;
+                        }
+
+                        try {
+                          const response = await addCommunityComment(update.update_id, {
+                            user_id: session.user.user_id,
+                            comment: draft,
+                          });
+
+                          setExpandedComments((current) => ({
+                            ...current,
+                            [update.update_id]: [...(current[update.update_id] || []), response.comment],
+                          }));
+
+                          setUpdates((current) => current.map((item) => (
+                            item.update_id === update.update_id
+                              ? { ...item, comment_count: (item.comment_count || 0) + 1 }
+                              : item
+                          )));
+
+                          setCommentDrafts((current) => ({ ...current, [update.update_id]: '' }));
+                        } catch (error) {
+                          setPostError(getApiErrorMessage(error, 'Unable to post comment.'));
+                        }
+                      }}
+                    >
+                      Post
+                    </button>
+                  </div>
+                </div>
               )}
             </article>
           ))}

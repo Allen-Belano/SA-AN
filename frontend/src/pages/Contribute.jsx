@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createRoute, getApiErrorMessage, getStoredSession, uploadRouteStepMedia } from '../api';
+import {
+  checkDuplicateRoute,
+  createRoute,
+  getApiErrorMessage,
+  getStoredSession,
+  uploadRouteStepMedia,
+} from '../api';
+
+const DRAFT_STORAGE_KEY = 'saan-route-draft';
 
 const createEmptyStep = (id) => ({
   id,
@@ -21,6 +29,26 @@ const Contribute = () => {
   const [steps, setSteps] = useState([createEmptyStep(1)]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      const savedDraft = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!savedDraft) {
+        return;
+      }
+
+      const parsed = JSON.parse(savedDraft);
+      if (parsed?.start || parsed?.destination || parsed?.steps?.length) {
+        setStart(parsed.start || '');
+        setDestination(parsed.destination || '');
+        setSteps(parsed.steps?.length ? parsed.steps : [createEmptyStep(1)]);
+      }
+    } catch {
+      // Ignore broken local drafts.
+    }
+  }, []);
 
   const addStep = () => {
     setSteps((current) => [...current, createEmptyStep(current.length + 1)]);
@@ -133,13 +161,59 @@ const Contribute = () => {
         })),
       };
 
+      const duplicateResult = await checkDuplicateRoute(payload);
+      if (duplicateResult.probable_duplicate) {
+        setDuplicateWarning(duplicateResult);
+
+        const confirmed = window.confirm('Possible duplicate route found. Do you still want to publish this route?');
+        if (!confirmed) {
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const result = await createRoute(payload);
       alert('Route submitted successfully! Thank you for helping fellow commuters.');
+      window.localStorage.removeItem(DRAFT_STORAGE_KEY);
       navigate(`/route/${result.route_id}`);
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, 'Unable to publish route. Please try again.'));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    const session = getStoredSession();
+
+    const localDraft = { start, destination, steps };
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(localDraft));
+
+    if (!session?.user?.user_id) {
+      setErrorMessage('Draft saved locally. Sign in to sync draft to server.');
+      return;
+    }
+
+    try {
+      await createRoute({
+        start_location: start.trim(),
+        destination: destination.trim(),
+        created_by: session.user.user_id,
+        is_draft: true,
+        steps: steps.map((step) => ({
+          instruction: step.instruction.trim() || 'Draft instruction',
+          vehicle_type: step.vehicle_type || null,
+          fare_regular: mapFare(step.fare_regular),
+          fare_discount: mapFare(step.fare_discount),
+          stop_location: step.stop_location.trim() || null,
+          photo_url: step.photo_url || null,
+          video_url: step.video_url || null,
+        })),
+      });
+
+      setErrorMessage('Draft saved locally and synced to server.');
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, 'Draft saved locally but server sync failed.'));
     }
   };
 
@@ -321,6 +395,41 @@ const Contribute = () => {
             <p className="form-message error-message" style={{ marginBottom: '0.9rem' }}>
               {errorMessage}
             </p>
+          )}
+
+          {duplicateWarning?.candidates?.length > 0 && (
+            <div className="card card-soft" style={{ marginBottom: '0.9rem' }}>
+              <strong style={{ fontSize: '0.84rem' }}>Potential duplicates found</strong>
+              <p style={{ margin: '0.35rem 0 0.4rem', fontSize: '0.78rem' }}>
+                Similar routes already exist. Review these before publishing:
+              </p>
+              {duplicateWarning.candidates.map((candidate) => (
+                <p key={candidate.route_id} style={{ margin: 0, fontSize: '0.76rem' }}>
+                  {candidate.start_location} to {candidate.destination} by {candidate.creator_name}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
+            <button type="button" className="btn" onClick={() => setShowPreview((current) => !current)}>
+              {showPreview ? 'Hide Preview' : 'Preview Route'}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleSaveDraft}>
+              Save Draft
+            </button>
+          </div>
+
+          {showPreview && (
+            <div className="card card-soft" style={{ marginBottom: '1rem' }}>
+              <strong style={{ display: 'block', marginBottom: '0.45rem' }}>Preview</strong>
+              <p style={{ margin: '0 0 0.45rem' }}>{start || 'Start'} to {destination || 'Destination'}</p>
+              {steps.map((step, index) => (
+                <p key={`preview-${index}`} style={{ margin: '0 0 0.25rem', fontSize: '0.78rem' }}>
+                  {index + 1}. {step.instruction || 'No instruction yet'}
+                </p>
+              ))}
+            </div>
           )}
 
           <button 

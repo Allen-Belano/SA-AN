@@ -60,8 +60,48 @@ export const getRoutes = async (params = {}) => {
   return response.data;
 };
 
-export const getRouteById = async (routeId) => {
-  const response = await api.get(`/routes/${routeId}`);
+export const getRouteRecommendations = async (userId) => {
+  const response = await api.get('/routes/recommendations', {
+    params: { user_id: userId },
+  });
+
+  return response.data;
+};
+
+export const getRouteById = async (routeId, params = {}) => {
+  const response = await api.get(`/routes/${routeId}`, { params });
+  return response.data;
+};
+
+export const getRouteLiveStatus = async (routeId) => {
+  const response = await api.get(`/routes/${routeId}/live-status`);
+  return response.data;
+};
+
+export const voteRoute = async (routeId, payload) => {
+  const response = await api.post(`/routes/${routeId}/vote`, payload);
+  return response.data;
+};
+
+export const bookmarkRoute = async (routeId, payload) => {
+  const response = await api.post(`/routes/${routeId}/bookmark`, payload);
+  return response.data;
+};
+
+export const reportRouteIssue = async (routeId, payload) => {
+  const response = await api.post(`/routes/${routeId}/report`, payload);
+  return response.data;
+};
+
+export const getSavedRoutes = async (userId) => {
+  const response = await api.get('/routes/bookmarks/list', {
+    params: { user_id: userId },
+  });
+  return response.data;
+};
+
+export const checkDuplicateRoute = async (payload) => {
+  const response = await api.post('/routes/check-duplicate', payload);
   return response.data;
 };
 
@@ -88,8 +128,44 @@ export const getCommunityUpdates = async (params = {}) => {
   return response.data;
 };
 
+export const reactToCommunityUpdate = async (updateId, payload) => {
+  const response = await api.post(`/updates/${updateId}/reactions`, payload);
+  return response.data;
+};
+
+export const getCommunityComments = async (updateId) => {
+  const response = await api.get(`/updates/${updateId}/comments`);
+  return response.data;
+};
+
+export const addCommunityComment = async (updateId, payload) => {
+  const response = await api.post(`/updates/${updateId}/comments`, payload);
+  return response.data;
+};
+
 export const createCommunityUpdate = async (payload) => {
   const response = await api.post('/updates', payload);
+  return response.data;
+};
+
+export const askCommuterChatbot = async (payload) => {
+  const response = await api.post('/chatbot/assist', payload);
+  return response.data;
+};
+
+export const getNotifications = async (userId, unreadOnly = false) => {
+  const response = await api.get('/notifications', {
+    params: {
+      user_id: userId,
+      unread: unreadOnly,
+    },
+  });
+
+  return response.data;
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  const response = await api.put(`/notifications/${notificationId}/read`);
   return response.data;
 };
 

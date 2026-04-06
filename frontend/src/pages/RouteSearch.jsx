@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { bookmarkRoute, getApiErrorMessage, getRoutes, getStoredSession } from '../api';
 
 const RouteSearch = () => {
   const [searchParams] = useSearchParams();
@@ -9,6 +10,13 @@ const RouteSearch = () => {
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [sortBy, setSortBy] = useState('popular');
+  const [routeMode, setRouteMode] = useState('standard');
+  const [filters, setFilters] = useState({ verifiedOnly: false, maxFare: '', minVotes: '' });
+
+  const session = getStoredSession();
+  const userId = session?.user?.user_id;
 
   useEffect(() => {
     if (start && destination) {
@@ -16,50 +24,32 @@ const RouteSearch = () => {
     }
   }, [searchParams]);
 
-  const handleSearch = (e) => {
+  const mapSearchParams = () => {
+    return {
+      start,
+      destination,
+      sort: sortBy,
+      mode: routeMode,
+      user_id: userId,
+      verified_only: filters.verifiedOnly,
+      min_votes: filters.minVotes || undefined,
+      max_fare: filters.maxFare || undefined,
+    };
+  };
+
+  const handleSearch = async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call for MVP
-    setTimeout(() => {
-      setResults([
-        {
-          id: 1,
-          provider: 'MRT-3 + Jeepney',
-          classType: 'Fastest',
-          start: "EDSA Taft",
-          destination: "SM North EDSA",
-          modes: ["Jeepney", "MRT-3"],
-          time: "45 mins",
-          fare: "₱28.00",
-          votes: 124,
-          author: "Juana Commuter",
-          codeFrom: 'TFT',
-          codeTo: 'SMN',
-          departure: '06:40',
-          arrival: '07:25',
-          rating: 4.6,
-        },
-        {
-          id: 3,
-          provider: 'EDSA Carousel',
-          classType: 'Budget',
-          start: "Taft Avenue",
-          destination: "SM North EDSA",
-          modes: ["Bus Carousel"],
-          time: "1 hr 10 mins",
-          fare: "₱32.00",
-          votes: 68,
-          author: "MetroGuide",
-          codeFrom: 'AYL',
-          codeTo: 'SMN',
-          departure: '07:05',
-          arrival: '08:15',
-          rating: 4.4,
-        }
-      ]);
+    setErrorMessage('');
+
+    try {
+      const response = await getRoutes(mapSearchParams());
+      setResults(response.routes || []);
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, 'Unable to search routes right now.'));
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleSwapLocations = () => {
@@ -71,6 +61,30 @@ const RouteSearch = () => {
 
     if (start && destination) {
       handleSearch();
+    }
+  };
+
+  const handleToggleSave = async (event, routeId, isSaved) => {
+    event.stopPropagation();
+
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await bookmarkRoute(routeId, {
+        user_id: userId,
+        action: isSaved ? 'remove' : 'save',
+      });
+
+      setResults((current) => current.map((route) => (
+        route.route_id === routeId
+          ? { ...route, is_saved: response.saved }
+          : route
+      )));
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, 'Unable to update saved routes.'));
     }
   };
 
@@ -137,10 +151,69 @@ const RouteSearch = () => {
             Update Search
           </button>
         </form>
+
+        <div className="dual-grid" style={{ marginTop: '0.9rem' }}>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Sort</label>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+              <option value="popular">Most popular</option>
+              <option value="trusted">Most trusted</option>
+              <option value="fastest">Fastest</option>
+              <option value="budget">Budget</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Mode</label>
+            <select value={routeMode} onChange={(event) => setRouteMode(event.target.value)}>
+              <option value="standard">Standard</option>
+              <option value="personalized">Personalized</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="dual-grid" style={{ marginTop: '0.7rem' }}>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Max Fare (P)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={filters.maxFare}
+              onChange={(event) => setFilters((current) => ({ ...current, maxFare: event.target.value }))}
+            />
+          </div>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label>Minimum Votes</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={filters.minVotes}
+              onChange={(event) => setFilters((current) => ({ ...current, minVotes: event.target.value }))}
+            />
+          </div>
+        </div>
+
+        <label style={{ display: 'inline-flex', gap: '0.45rem', alignItems: 'center', marginTop: '0.7rem', fontSize: '0.84rem' }}>
+          <input
+            type="checkbox"
+            checked={filters.verifiedOnly}
+            onChange={(event) => setFilters((current) => ({ ...current, verifiedOnly: event.target.checked }))}
+            style={{ width: 'auto' }}
+          />
+          Show only verified routes
+        </label>
       </div>
 
       <div className="inline-grid">
         <h2>Matching Routes</h2>
+
+        {errorMessage && (
+          <div className="card card-soft" style={{ border: '1px solid rgba(215, 70, 85, 0.4)' }}>
+            {errorMessage}
+          </div>
+        )}
         
         {loading ? (
           <div className="card card-soft" style={{ textAlign: 'center', padding: '2rem' }}>
@@ -148,38 +221,47 @@ const RouteSearch = () => {
           </div>
         ) : results.length > 0 ? (
           results.map(route => (
-            <div key={route.id} className="card card-soft result-ticket" onClick={() => navigate(`/route/${route.id}`)} style={{ cursor: 'pointer' }}>
+            <div key={route.route_id} className="card card-soft result-ticket" onClick={() => navigate(`/route/${route.route_id}`)} style={{ cursor: 'pointer' }}>
               <div className="row-between" style={{ marginBottom: '0.4rem' }}>
                 <div className="stack-sm" style={{ gap: '0.15rem' }}>
-                  <span className="muted-text" style={{ fontSize: '0.7rem' }}>{route.classType}</span>
-                  <strong style={{ fontSize: '1.04rem' }}>{route.provider}</strong>
+                  <span className="muted-text" style={{ fontSize: '0.7rem' }}>
+                    {route.is_verified ? 'Verified' : 'Community'}
+                  </span>
+                  <strong style={{ fontSize: '1.04rem' }}>{route.start_location} to {route.destination}</strong>
                 </div>
-                <div className="ticket-actions" aria-hidden="true">
-                  <span>♡</span>
-                  <span>🔖</span>
+                <div className="ticket-actions">
+                  <span title="Trust score">Trust {route.trust_score}</span>
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={(event) => handleToggleSave(event, route.route_id, route.is_saved)}
+                    aria-label={route.is_saved ? 'Remove saved route' : 'Save route'}
+                  >
+                    {route.is_saved ? '★' : '☆'}
+                  </button>
                 </div>
               </div>
 
               <div className="ticket-journey" style={{ marginBottom: '0.55rem' }}>
                 <div>
-                  <strong>{route.codeFrom}</strong>
-                  <span>{route.departure}</span>
+                  <strong>{route.start_location.slice(0, 3).toUpperCase()}</strong>
+                  <span>{route.step_count} steps</span>
                 </div>
                 <span className="journey-line">• • •</span>
                 <div>
-                  <strong>{route.codeTo}</strong>
-                  <span>{route.arrival}</span>
+                  <strong>{route.destination.slice(0, 3).toUpperCase()}</strong>
+                  <span>{route.estimated_duration_minutes || 40} mins</span>
                 </div>
               </div>
 
               <div className="row-between" style={{ marginBottom: '0.45rem' }}>
-                <span className="reschedule-pill">Community verified route</span>
-                <span className="price-pill">{route.fare}</span>
+                <span className="reschedule-pill">{route.is_verified ? 'Community verified route' : 'Needs more verification'}</span>
+                <span className="price-pill">P{Number(route.total_fare || 0).toFixed(2)}</span>
               </div>
 
               <div className="row-between muted-text" style={{ fontSize: '0.74rem' }}>
-                <span>★ {route.rating} • {route.time}</span>
-                <span>By {route.author} • {route.votes} votes</span>
+                <span>Trust {route.trust_score} • Votes {route.vote_score}</span>
+                <span>By {route.creator_name}</span>
               </div>
             </div>
           ))

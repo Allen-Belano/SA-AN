@@ -4,7 +4,9 @@ import {
   clearSession,
   fetchCurrentUser,
   getApiErrorMessage,
+  getSavedRoutes,
   getStoredSession,
+  getNotifications,
   storeSession,
   updateCurrentUser,
 } from '../api';
@@ -60,6 +62,8 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [savedRoutes, setSavedRoutes] = useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   useEffect(() => {
     if (!session?.token) {
@@ -79,6 +83,14 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
           storeSession(nextSession);
           return nextSession;
         });
+
+        const [bookmarksResult, notificationsResult] = await Promise.all([
+          getSavedRoutes(session.user.user_id),
+          getNotifications(session.user.user_id, true),
+        ]);
+
+        setSavedRoutes(bookmarksResult.bookmarks || []);
+        setUnreadNotificationCount((notificationsResult.notifications || []).length);
       } catch (error) {
         setErrorMessage(getApiErrorMessage(error, 'Unable to load your profile right now.'));
       } finally {
@@ -316,6 +328,37 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
               </div>
             </div>
 
+            <div className="card card-soft" style={{ marginBottom: '0.9rem' }}>
+              <strong style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.86rem' }}>Notification Preferences</strong>
+              <label style={{ display: 'inline-flex', gap: '0.45rem', alignItems: 'center', marginBottom: '0.45rem' }}>
+                <input
+                  type="checkbox"
+                  checked={profile.notify_disruptions !== false}
+                  onChange={(event) => setProfile((current) => ({ ...current, notify_disruptions: event.target.checked }))}
+                  style={{ width: 'auto' }}
+                />
+                Disruption alerts
+              </label>
+              <label style={{ display: 'inline-flex', gap: '0.45rem', alignItems: 'center', marginBottom: '0.45rem' }}>
+                <input
+                  type="checkbox"
+                  checked={profile.notify_safety !== false}
+                  onChange={(event) => setProfile((current) => ({ ...current, notify_safety: event.target.checked }))}
+                  style={{ width: 'auto' }}
+                />
+                Safety reminders
+              </label>
+              <label style={{ display: 'inline-flex', gap: '0.45rem', alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={profile.notify_saved_routes !== false}
+                  onChange={(event) => setProfile((current) => ({ ...current, notify_saved_routes: event.target.checked }))}
+                  style={{ width: 'auto' }}
+                />
+                Saved route updates
+              </label>
+            </div>
+
             <button type="submit" className="btn btn-primary">
               {saving ? 'Saving...' : 'Save Profile'}
             </button>
@@ -350,6 +393,32 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
         </div>
       </div>
 
+      <div className="card card-soft glass-card">
+        <div className="row-between" style={{ marginBottom: '0.55rem' }}>
+          <h2 style={{ marginBottom: 0 }}>Saved Routes</h2>
+          <span className="pill">{savedRoutes.length} routes</span>
+        </div>
+
+        {savedRoutes.length === 0 ? (
+          <p style={{ margin: 0, fontSize: '0.82rem' }}>No saved routes yet. Save routes from search or guide page.</p>
+        ) : (
+          savedRoutes.slice(0, 5).map((item) => (
+            <button
+              key={item.route_id}
+              type="button"
+              className="menu-item"
+              style={{ textAlign: 'left' }}
+              onClick={() => navigate(`/route/${item.route_id}`)}
+            >
+              <div>
+                <strong>{item.start_location} to {item.destination}</strong>
+                <p>Trust {item.trust_score} • Votes {item.vote_score}</p>
+              </div>
+            </button>
+          ))
+        )}
+      </div>
+
       <div className="card card-soft glass-card setup-panel">
         <div className="section-header" style={{ marginTop: 0 }}>
           <h2>Focused Setup</h2>
@@ -367,14 +436,30 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
           <div className="setup-block">
             <span className="setup-label">Security</span>
             <strong>{session?.token ? 'Session active' : 'Login not connected'}</strong>
-            <p>{session?.token ? 'Your current session can update profile data through the backend API.' : 'Sign in to persist your profile and keep saved routes synced.'}</p>
+            <p>
+              {session?.token
+                ? `Your account has ${unreadNotificationCount} unread notifications.`
+                : 'Sign in to persist your profile and keep saved routes synced.'}
+            </p>
           </div>
           <div className="setup-block">
             <span className="setup-label">Appearance</span>
             <strong>Theme: {theme === 'dark' ? 'Dark mode' : 'Light mode'}</strong>
             <p>Switch app theme for better comfort in day or night commuting.</p>
-            <button type="button" className="btn btn-secondary profile-theme-btn" onClick={onToggleTheme}>
-              Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
+            <button
+              type="button"
+              className={`profile-theme-toggle ${theme === 'dark' ? 'is-dark' : 'is-light'}`}
+              onClick={onToggleTheme}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              <span className="profile-theme-track" aria-hidden="true">
+                <span className="profile-theme-knob">
+                  <span className="theme-icon theme-icon-sun">☀</span>
+                  <span className="theme-icon theme-icon-moon">☾</span>
+                </span>
+              </span>
             </button>
           </div>
         </div>

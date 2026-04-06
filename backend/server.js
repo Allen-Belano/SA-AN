@@ -46,7 +46,88 @@ const ensureUpdatesColumns = async () => {
     ALTER TABLE Updates
     ADD COLUMN IF NOT EXISTS title VARCHAR(255),
     ADD COLUMN IF NOT EXISTS category VARCHAR(80),
-    ADD COLUMN IF NOT EXISTS location VARCHAR(255)
+    ADD COLUMN IF NOT EXISTS location VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS severity VARCHAR(20) DEFAULT 'medium',
+    ADD COLUMN IF NOT EXISTS is_urgent BOOLEAN DEFAULT FALSE
+  `);
+};
+
+const ensureRouteColumns = async () => {
+  await pool.query(`
+    ALTER TABLE Routes
+    ADD COLUMN IF NOT EXISTS estimated_duration_minutes INT,
+    ADD COLUMN IF NOT EXISTS is_draft BOOLEAN DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS trust_score INT DEFAULT 0
+  `);
+};
+
+const ensureUserPreferenceColumns = async () => {
+  await pool.query(`
+    ALTER TABLE Users
+    ADD COLUMN IF NOT EXISTS notify_disruptions BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS notify_safety BOOLEAN DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS notify_saved_routes BOOLEAN DEFAULT TRUE
+  `);
+};
+
+const ensureVoteConstraints = async () => {
+  await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_votes_user_route ON Votes(user_id, route_id)');
+};
+
+const ensureAuxiliaryTables = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS RouteBookmarks (
+      bookmark_id SERIAL PRIMARY KEY,
+      user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+      route_id INT REFERENCES Routes(route_id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, route_id)
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS RouteReports (
+      report_id SERIAL PRIMARY KEY,
+      route_id INT REFERENCES Routes(route_id) ON DELETE CASCADE,
+      user_id INT REFERENCES Users(user_id) ON DELETE SET NULL,
+      reason VARCHAR(120) NOT NULL,
+      details TEXT,
+      status VARCHAR(20) DEFAULT 'open',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS UpdateReactions (
+      reaction_id SERIAL PRIMARY KEY,
+      update_id INT REFERENCES Updates(update_id) ON DELETE CASCADE,
+      user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+      reaction_type VARCHAR(30) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(update_id, user_id, reaction_type)
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS UpdateComments (
+      comment_id SERIAL PRIMARY KEY,
+      update_id INT REFERENCES Updates(update_id) ON DELETE CASCADE,
+      user_id INT REFERENCES Users(user_id) ON DELETE SET NULL,
+      comment TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS UserNotifications (
+      notification_id SERIAL PRIMARY KEY,
+      user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+      title VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      kind VARCHAR(40) DEFAULT 'general',
+      is_read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
   `);
 };
 
@@ -56,6 +137,10 @@ pool.connect()
     await ensureProfileColumns();
     await ensureRouteStepMediaColumns();
     await ensureUpdatesColumns();
+    await ensureRouteColumns();
+    await ensureUserPreferenceColumns();
+    await ensureAuxiliaryTables();
+    await ensureVoteConstraints();
   })
   .catch(err => console.error('Database connection error:', err));
 
@@ -69,10 +154,14 @@ app.use((req, res, next) => {
 const userRoutes = require('./routes/users');
 const routeRoutes = require('./routes/routes');
 const updatesRoutes = require('./routes/updates');
+const notificationsRoutes = require('./routes/notifications');
+const chatbotRoutes = require('./routes/chatbot');
 
 app.use('/api/users', userRoutes);
 app.use('/api/routes', routeRoutes);
 app.use('/api/updates', updatesRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.get('/', (req, res) => {
   res.send('SA/AN API is running');

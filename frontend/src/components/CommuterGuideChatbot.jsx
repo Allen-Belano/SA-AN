@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { askCommuterChatbot, getStoredSession } from '../api';
 
 const quickPrompts = [
   'Where am I now?',
@@ -151,6 +152,9 @@ const CommuterGuideChatbot = () => {
       text: 'Hi! I am Navvia, your SA/AN commute buddy. I can use GPS for place trivia and still answer commuter guidance offline.',
     },
   ]);
+  const [lastRouteContext, setLastRouteContext] = useState({ start: '', destination: '' });
+
+  const session = getStoredSession();
 
   const quickActions = useMemo(() => quickPrompts, []);
 
@@ -234,7 +238,27 @@ const CommuterGuideChatbot = () => {
       const locationReply = await requestLocationInsight();
       appendBotMessage(locationReply);
     } else {
-      appendBotMessage(buildReply(cleanText));
+      const routeHint = cleanText.match(/from\s+(.+?)\s+to\s+(.+)/i);
+      const nextContext = routeHint
+        ? { start: routeHint[1].trim(), destination: routeHint[2].trim() }
+        : lastRouteContext;
+
+      if (routeHint) {
+        setLastRouteContext(nextContext);
+      }
+
+      try {
+        const response = await askCommuterChatbot({
+          message: cleanText,
+          user_id: session?.user?.user_id,
+          start: nextContext.start,
+          destination: nextContext.destination,
+        });
+
+        appendBotMessage(response.answer || buildReply(cleanText));
+      } catch {
+        appendBotMessage(buildReply(cleanText));
+      }
     }
 
     setDraft('');

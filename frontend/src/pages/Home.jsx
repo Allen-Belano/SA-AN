@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getNotifications, getRouteRecommendations, getStoredSession } from '../api';
 
 const commuterTips = [
   {
@@ -47,7 +48,11 @@ const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
   const [activeTipIndex, setActiveTipIndex] = useState(0);
+  const [dynamicRecommendations, setDynamicRecommendations] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
   const navigate = useNavigate();
+
+  const session = getStoredSession();
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -56,6 +61,28 @@ const Home = () => {
 
     return () => window.clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    const loadPersonalization = async () => {
+      if (!session?.user?.user_id) {
+        return;
+      }
+
+      try {
+        const [recommendationsResult, notificationsResult] = await Promise.all([
+          getRouteRecommendations(session.user.user_id),
+          getNotifications(session.user.user_id, true),
+        ]);
+
+        setDynamicRecommendations(recommendationsResult.recommendations || []);
+        setNotificationCount((notificationsResult.notifications || []).length);
+      } catch {
+        // Keep fallback content when personalization APIs fail.
+      }
+    };
+
+    loadPersonalization();
+  }, [session?.user?.user_id]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -72,7 +99,9 @@ const Home = () => {
         <span className="points-pill">320 points</span>
         <div className="quick-actions" aria-label="Quick actions">
           <button type="button" className="round-icon" aria-label="Search">⌕</button>
-          <button type="button" className="round-icon" aria-label="Notifications">◌</button>
+          <button type="button" className="round-icon" aria-label="Notifications" title={`${notificationCount} unread notifications`}>
+            {notificationCount > 0 ? notificationCount : '◌'}
+          </button>
         </div>
       </div>
 
@@ -196,12 +225,12 @@ const Home = () => {
           <span className="link-pill">View all</span>
         </div>
         <div className="recommend-grid">
-          {recommendations.map((item) => (
-            <article key={item.id} className="recommend-card">
+          {(dynamicRecommendations.length > 0 ? dynamicRecommendations : recommendations).map((item) => (
+            <article key={item.id || item.route_id} className="recommend-card">
               <div className="recommend-visual" aria-hidden="true"></div>
               <div className="recommend-copy">
-                <strong>{item.title}</strong>
-                <span>{item.subtitle}</span>
+                <strong>{item.title || `${item.start_location} to ${item.destination}`}</strong>
+                <span>{item.subtitle || item.recommendation_reason || 'Community recommended route'}</span>
               </div>
             </article>
           ))}

@@ -22,7 +22,10 @@ const mapUserProfile = (user) => ({
     budget_level: user.budget_level || '',
     travel_window: user.travel_window || '',
     emergency_contact: user.emergency_contact || '',
-    avatar_color: user.avatar_color || '#f0932b'
+    avatar_color: user.avatar_color || '#f0932b',
+    notify_disruptions: user.notify_disruptions !== false,
+    notify_safety: user.notify_safety !== false,
+    notify_saved_routes: user.notify_saved_routes !== false,
 });
 
 const authenticateUser = (req, res, next) => {
@@ -126,7 +129,10 @@ router.put('/me', authenticateUser, async (req, res) => {
             budget_level,
             travel_window,
             emergency_contact,
-            avatar_color
+            avatar_color,
+            notify_disruptions,
+            notify_safety,
+            notify_saved_routes,
         } = req.body;
 
         const updatedUser = await req.pool.query(
@@ -138,8 +144,11 @@ router.put('/me', authenticateUser, async (req, res) => {
                  budget_level = $5,
                  travel_window = $6,
                  emergency_contact = $7,
-                 avatar_color = $8
-             WHERE user_id = $9
+                 avatar_color = $8,
+                 notify_disruptions = $9,
+                 notify_safety = $10,
+                 notify_saved_routes = $11
+             WHERE user_id = $12
              RETURNING *`,
             [
                 name,
@@ -150,7 +159,10 @@ router.put('/me', authenticateUser, async (req, res) => {
                 travel_window || '',
                 emergency_contact || '',
                 avatar_color || '#f0932b',
-                req.user.user_id
+                notify_disruptions !== false,
+                notify_safety !== false,
+                notify_saved_routes !== false,
+                req.user.user_id,
             ]
         );
 

@@ -208,8 +208,8 @@ body {
   height: 210px;
   left: -62px;
   top: -48px;
-  background: radial-gradient(circle at 30% 20%, #9ad2ff, #5e90db);
-  animation: floatY 7s ease-in-out infinite;
+  background: radial-gradient(circle at 25% 25%, rgba(187, 247, 248, 0.95), rgba(24, 169, 171, 0.72), rgba(13, 119, 121, 0.25));
+  animation: floatY 7s ease-in-out infinite, gradientPulse 8s ease-in-out infinite;
 }
 
 .orb-right {
@@ -217,8 +217,8 @@ body {
   height: 188px;
   right: -52px;
   bottom: -56px;
-  background: radial-gradient(circle at 30% 20%, #b6e6ef, #6db6cf);
-  animation: floatY 8s ease-in-out infinite reverse;
+  background: radial-gradient(circle at 25% 25%, rgba(170, 242, 244, 0.92), rgba(24, 169, 171, 0.7), rgba(11, 105, 107, 0.2));
+  animation: floatY 8s ease-in-out infinite reverse, gradientPulse 9s ease-in-out infinite reverse;
 }
 
 #root {
@@ -286,13 +286,23 @@ p {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  overflow: hidden;
+}
+
+.ambient-layer::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  background: linear-gradient(120deg, rgba(24, 169, 171, 0.16), rgba(24, 169, 171, 0.06), rgba(24, 169, 171, 0.2));
+  background-size: 220% 220%;
+  animation: gradientDrift 16s ease-in-out infinite;
 }
 
 .orb {
   position: absolute;
-  border-radius: 999px;
-  filter: blur(2px);
-  opacity: 0.44;
+  border-radius: 42% 58% 53% 47% / 46% 39% 61% 54%;
+  filter: blur(4px);
+  opacity: 0.36;
 }
 
 .orb-a {
@@ -300,8 +310,8 @@ p {
   height: 170px;
   left: -58px;
   top: -46px;
-  background: radial-gradient(circle at 30% 30%, #a9cbff, #6d9be2);
-  animation: floatY 8s ease-in-out infinite;
+  background: radial-gradient(circle at 30% 30%, rgba(182, 245, 247, 0.92), rgba(24, 169, 171, 0.7), rgba(10, 98, 100, 0.22));
+  animation: floatY 8s ease-in-out infinite, gradientPulse 10s ease-in-out infinite;
 }
 
 .orb-b {
@@ -309,8 +319,8 @@ p {
   height: 160px;
   right: -74px;
   top: 130px;
-  background: radial-gradient(circle at 30% 30%, #b4e9f1, #72bdd1);
-  animation: floatY 10s ease-in-out infinite reverse;
+  background: radial-gradient(circle at 30% 30%, rgba(165, 240, 242, 0.9), rgba(24, 169, 171, 0.66), rgba(9, 90, 92, 0.18));
+  animation: floatY 10s ease-in-out infinite reverse, gradientPulse 11s ease-in-out infinite reverse;
 }
 
 .orb-c {
@@ -318,8 +328,33 @@ p {
   height: 140px;
   right: 80px;
   bottom: 78px;
-  background: radial-gradient(circle at 30% 30%, #d6ccff, #9ea8f0);
-  animation: floatY 7s ease-in-out infinite;
+  background: radial-gradient(circle at 30% 30%, rgba(198, 249, 250, 0.86), rgba(24, 169, 171, 0.62), rgba(8, 78, 80, 0.14));
+  animation: floatY 7s ease-in-out infinite, gradientPulse 9s ease-in-out infinite;
+}
+
+@keyframes gradientDrift {
+  0% {
+    transform: translate3d(-5%, -3%, 0) rotate(0deg);
+    background-position: 0% 50%;
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) rotate(4deg);
+    background-position: 100% 50%;
+  }
+  100% {
+    transform: translate3d(-5%, -3%, 0) rotate(0deg);
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes gradientPulse {
+  0%,
+  100% {
+    filter: blur(4px) saturate(1);
+  }
+  50% {
+    filter: blur(6px) saturate(1.12);
+  }
 }
 
 .content-area {
@@ -1381,6 +1416,98 @@ textarea:focus {
   margin-top: 0.65rem;
 }
 
+.profile-theme-toggle {
+  margin-top: 0.65rem;
+  width: 168px;
+  max-width: 100%;
+  height: 72px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px;
+  cursor: pointer;
+  background: linear-gradient(145deg, #eceef2, #d7dae0);
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.88), inset 0 -3px 7px rgba(120, 126, 138, 0.2), 0 8px 20px rgba(48, 60, 84, 0.16);
+  transition: background 260ms ease, box-shadow 260ms ease, transform 160ms ease;
+}
+
+.profile-theme-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.profile-theme-toggle:focus-visible {
+  outline: 2px solid rgba(21, 115, 173, 0.6);
+  outline-offset: 3px;
+}
+
+.profile-theme-track {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #f9fafc, #d8dce3);
+  box-shadow: inset 0 3px 10px rgba(255, 255, 255, 0.74), inset 0 -4px 10px rgba(98, 107, 122, 0.22);
+}
+
+.profile-theme-knob {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #ffffff, #eceef4);
+  box-shadow: 0 6px 14px rgba(52, 64, 87, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: transform 280ms cubic-bezier(0.2, 0.85, 0.24, 1), background 280ms ease, box-shadow 280ms ease;
+}
+
+.theme-icon {
+  position: absolute;
+  font-size: 1.45rem;
+  line-height: 1;
+  transition: opacity 220ms ease, transform 220ms ease, color 220ms ease;
+}
+
+.theme-icon-sun {
+  color: #f5ca3d;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.theme-icon-moon {
+  color: #f4f7ff;
+  opacity: 0;
+  transform: scale(0.75);
+}
+
+.profile-theme-toggle.is-dark {
+  background: linear-gradient(145deg, #272a31, #191b20);
+  box-shadow: inset 0 1px 8px rgba(255, 255, 255, 0.08), inset 0 -4px 10px rgba(0, 0, 0, 0.5), 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+.profile-theme-toggle.is-dark .profile-theme-track {
+  background: linear-gradient(145deg, #2e323a, #15171c);
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.06), inset 0 -4px 10px rgba(0, 0, 0, 0.55);
+}
+
+.profile-theme-toggle.is-dark .profile-theme-knob {
+  transform: translateX(96px);
+  background: linear-gradient(145deg, #2f333a, #15171c);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.12);
+}
+
+.profile-theme-toggle.is-dark .theme-icon-sun {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.profile-theme-toggle.is-dark .theme-icon-moon {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .profile-link-btn {
   text-decoration: none;
 }
@@ -1455,6 +1582,22 @@ textarea:focus {
 .setup-block p {
   margin: 0;
   font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .profile-theme-toggle {
+    width: 156px;
+    height: 66px;
+  }
+
+  .profile-theme-knob {
+    width: 48px;
+    height: 48px;
+  }
+
+  .profile-theme-toggle.is-dark .profile-theme-knob {
+    transform: translateX(88px);
+  }
 }
 
 .setup-label {

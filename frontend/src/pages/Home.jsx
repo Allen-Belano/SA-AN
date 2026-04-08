@@ -47,6 +47,7 @@ const recommendations = [
 const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
+  const [activeMode, setActiveMode] = useState(travelModes[0].id);
   const [activeTipIndex, setActiveTipIndex] = useState(0);
   const [dynamicRecommendations, setDynamicRecommendations] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -92,6 +93,7 @@ const Home = () => {
   };
 
   const activeTip = commuterTips[activeTipIndex];
+  const selectedMode = travelModes.find((mode) => mode.id === activeMode) || travelModes[0];
 
   return (
     <div className="screen-stack home-screen">
@@ -112,12 +114,23 @@ const Home = () => {
 
       <div className="transport-tabs">
         {travelModes.map((mode) => (
-          <button key={mode.id} type="button" className="transport-tab">
+          <button
+            key={mode.id}
+            type="button"
+            className={`transport-tab ${activeMode === mode.id ? 'active' : ''}`}
+            onClick={() => setActiveMode(mode.id)}
+            aria-pressed={activeMode === mode.id}
+            aria-label={`Filter by ${mode.label}`}
+          >
             <span className="mode-emoji" aria-hidden="true">{mode.emoji}</span>
             <span>{mode.label}</span>
           </button>
         ))}
       </div>
+
+      <p className="transport-tab-status" aria-live="polite">
+        Showing {selectedMode.label} routes near you
+      </p>
 
       <div className="card card-soft trip-finder-card">
         <div className="row-between" style={{ marginBottom: '0.65rem' }}>

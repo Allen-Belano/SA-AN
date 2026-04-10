@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getApiErrorMessage, getStoredSession, loginUser, registerUser, storeSession } from '../api';
+import { getStoredSession, storeSession } from '../api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,29 +34,27 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const payload = mode === 'login'
-        ? { email: form.email, password: form.password }
-        : { name: form.name.trim(), email: form.email, password: form.password };
+      const normalizedEmail = (form.email || '').trim() || `guest${Date.now()}@local`;
+      const normalizedName = mode === 'signup'
+        ? (form.name || '').trim() || 'New Commuter'
+        : 'Commuter';
 
-      const response = mode === 'login'
-        ? await loginUser(payload)
-        : await registerUser(payload);
+      const localSession = {
+        token: 'local-dev-session',
+        user: {
+          user_id: Date.now(),
+          name: normalizedName,
+          email: normalizedEmail,
+          avatar_color: '#f0932b',
+          avatar_memoji: null,
+          is_new_user: mode === 'signup',
+        },
+      };
 
-      storeSession(response);
-      navigate('/');
-    } catch (error) {
-      // Fall back to guest session if server is down (5xx errors)
-      const status = error.response?.status;
-      if (status >= 500) {
-        const guestSession = {
-          token: 'local-dev-session',
-          user: { name: 'Guest Commuter', email: form.email || 'guest@local' },
-        };
-        storeSession(guestSession);
-        navigate('/');
-        return;
-      }
-      setErrorMessage(getApiErrorMessage(error, 'Unable to continue. Check your credentials and try again.'));
+      storeSession(localSession);
+      navigate(mode === 'signup' ? '/profile' : '/');
+    } catch {
+      setErrorMessage('Unable to continue in local auth mode. Please try again.');
     } finally {
       setSubmitting(false);
     }

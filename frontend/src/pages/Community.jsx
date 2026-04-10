@@ -9,6 +9,7 @@ import {
   getStoredSession,
   reactToCommunityUpdate,
 } from '../api';
+import MemojiAvatar from '../components/MemojiAvatar';
 
 const categoryOptions = [
   'Accident',
@@ -302,7 +303,11 @@ const Community = () => {
             <article key={update.update_id} className="card card-soft community-post">
               <div className="community-post-header">
                 <div className="community-author-avatar" style={{ background: update.avatar_color || '#f0932b' }}>
-                  {getInitials(update.author_name)}
+                  {update.avatar_memoji ? (
+                    <MemojiAvatar config={update.avatar_memoji} size={34} />
+                  ) : (
+                    getInitials(update.author_name)
+                  )}
                 </div>
                 <div>
                   <strong>{update.author_name || 'Commuter'}</strong>

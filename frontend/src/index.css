@@ -941,6 +941,11 @@ textarea:focus {
   font-weight: 800;
   border: 2px solid rgba(255, 255, 255, 0.82);
   box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.community-author-avatar .memoji-avatar {
+  border-radius: 999px;
 }
 
 .community-meta-row {
@@ -1372,6 +1377,11 @@ textarea:focus {
   font-family: 'Sora', 'Manrope', sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
+  overflow: hidden;
+}
+
+.profile-memoji-avatar {
+  border-radius: 20px;
 }
 
 .profile-copy {
@@ -1638,6 +1648,86 @@ textarea:focus {
 
 .color-dot.active {
   outline: 2px solid rgba(95, 71, 51, 0.4);
+  outline-offset: 2px;
+}
+
+.memoji-editor-card {
+  margin-bottom: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.memoji-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.memoji-editor-preview {
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.memoji-preset-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.memoji-preset-btn {
+  border: 1px solid rgba(194, 212, 229, 0.76);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 0.38rem 0.28rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.26rem;
+  font-size: 0.68rem;
+  color: #4b5d74;
+  cursor: pointer;
+}
+
+.memoji-preset-btn .memoji-avatar {
+  border-radius: 11px;
+}
+
+.memoji-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.memoji-palette-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.memoji-palette-label {
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #536681;
+}
+
+.memoji-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.memoji-color-chip {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+.memoji-color-chip.active {
+  outline: 2px solid rgba(80, 101, 126, 0.5);
   outline-offset: 2px;
 }
 

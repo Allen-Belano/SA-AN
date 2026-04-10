@@ -11,6 +11,7 @@ CREATE TABLE Users (
     travel_window VARCHAR(100),
     emergency_contact VARCHAR(255),
     avatar_color VARCHAR(50) DEFAULT '#f0932b',
+    avatar_memoji JSONB,
     notify_disruptions BOOLEAN DEFAULT TRUE,
     notify_safety BOOLEAN DEFAULT TRUE,
     notify_saved_routes BOOLEAN DEFAULT TRUE,

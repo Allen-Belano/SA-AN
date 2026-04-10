@@ -25,6 +25,8 @@ export const clearSession = () => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
 };
 
+const isLocalDevSessionToken = (token) => token === 'local-dev-session';
+
 export const registerUser = async (payload) => {
   const response = await api.post('/users/register', payload);
   return response.data;
@@ -36,6 +38,16 @@ export const loginUser = async (payload) => {
 };
 
 export const fetchCurrentUser = async (token) => {
+  if (isLocalDevSessionToken(token)) {
+    const session = getStoredSession();
+
+    if (!session?.user) {
+      throw new Error('No local user session found');
+    }
+
+    return { user: session.user };
+  }
+
   const response = await api.get('/users/me', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -46,6 +58,26 @@ export const fetchCurrentUser = async (token) => {
 };
 
 export const updateCurrentUser = async (token, payload) => {
+  if (isLocalDevSessionToken(token)) {
+    const session = getStoredSession();
+
+    if (!session?.user) {
+      throw new Error('No local user session found');
+    }
+
+    const updatedUser = {
+      ...session.user,
+      ...payload,
+    };
+
+    storeSession({
+      ...session,
+      user: updatedUser,
+    });
+
+    return { user: updatedUser };
+  }
+
   const response = await api.put('/users/me', payload, {
     headers: {
       Authorization: `Bearer ${token}`,

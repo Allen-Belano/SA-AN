@@ -818,19 +818,23 @@ textarea:focus {
   align-content: start;
   overflow: hidden;
   position: relative;
-  cursor: pointer;
+  cursor: default;
   transition: max-height 280ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.transit-news-item.expandable {
+  cursor: pointer;
 }
 
 .transit-news-item.expanded {
   max-height: 460px;
 }
 
-.transit-news-item:hover {
+.transit-news-item.expandable:hover {
   box-shadow: 0 8px 18px rgba(94, 126, 152, 0.2);
 }
 
-.transit-news-item:focus-visible {
+.transit-news-item.expandable:focus-visible {
   outline: 2px solid rgba(75, 129, 172, 0.55);
   outline-offset: 2px;
 }
@@ -887,11 +891,20 @@ textarea:focus {
   position: absolute;
   right: 0.62rem;
   bottom: 0.52rem;
-  font-size: 1.18rem;
-  font-weight: 800;
   color: #2e5f8a;
   line-height: 1;
   transition: transform 260ms ease;
+}
+
+.transit-news-arrow svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .transit-news-arrow.expanded {
@@ -3453,9 +3466,13 @@ textarea:focus {
   }
 
   .transit-news-arrow {
-    font-size: 1.08rem;
     right: 0.54rem;
     bottom: 0.48rem;
+  }
+
+  .transit-news-arrow svg {
+    width: 16px;
+    height: 16px;
   }
 }
 

@@ -358,58 +358,61 @@ const Home = () => {
         ) : (
           <div className="transit-news-list">
             {sortedTransportNews.map((item) => (
-              <article
-                key={item.news_id}
-                className={`transit-news-item ${expandedNewsIds.includes(item.news_id) ? 'expanded' : ''}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleNewsExpansion(item.news_id)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    toggleNewsExpansion(item.news_id);
-                  }
-                }}
-              >
-                {(() => {
-                  const cleanedTitle = sanitizeNewsText(item.title);
-                  const cleanedDetails = sanitizeNewsText(item.details);
-                  const reportDate = formatNewsDate(item.published_at, item.created_at);
-                  const showDetails = cleanedDetails && cleanedDetails !== cleanedTitle;
-                  const isExpanded = expandedNewsIds.includes(item.news_id);
+              (() => {
+                const cleanedTitle = sanitizeNewsText(item.title);
+                const cleanedDetails = sanitizeNewsText(item.details);
+                const reportDate = formatNewsDate(item.published_at, item.created_at);
+                const showDetails = cleanedDetails && cleanedDetails !== cleanedTitle;
+                const isExpanded = expandedNewsIds.includes(item.news_id);
+                const isExpandable = cleanedTitle.length > 85 || (showDetails && cleanedDetails.length > 150);
 
-                  return (
-                    <>
-                      <div className="transit-news-meta-row">
-                        <span className={`transit-news-badge category-${(item.category || 'advisory').toLowerCase()}`}>
-                          {getNewsBadgeLabel(item.category)}
-                        </span>
-                        <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
-                      </div>
-                      {reportDate && <time className="transit-news-date">{reportDate}</time>}
-                      <strong className="transit-news-item-title">{cleanedTitle || 'Transit advisory'}</strong>
-                      {showDetails && <p className="transit-news-item-details">{cleanedDetails}</p>}
-                      {item.source_url && (
-                        <a
-                          href={item.source_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="transit-news-link"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          Read source
-                        </a>
-                      )}
+                return (
+                  <article
+                    key={item.news_id}
+                    className={`transit-news-item ${isExpanded ? 'expanded' : ''} ${isExpandable ? 'expandable' : ''}`}
+                    role={isExpandable ? 'button' : undefined}
+                    tabIndex={isExpandable ? 0 : undefined}
+                    onClick={isExpandable ? () => toggleNewsExpansion(item.news_id) : undefined}
+                    onKeyDown={isExpandable ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleNewsExpansion(item.news_id);
+                      }
+                    } : undefined}
+                  >
+                    <div className="transit-news-meta-row">
+                      <span className={`transit-news-badge category-${(item.category || 'advisory').toLowerCase()}`}>
+                        {getNewsBadgeLabel(item.category)}
+                      </span>
+                      <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
+                    </div>
+                    {reportDate && <time className="transit-news-date">{reportDate}</time>}
+                    <strong className="transit-news-item-title">{cleanedTitle || 'Transit advisory'}</strong>
+                    {showDetails && <p className="transit-news-item-details">{cleanedDetails}</p>}
+                    {item.source_url && (
+                      <a
+                        href={item.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="transit-news-link"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        Read source
+                      </a>
+                    )}
+                    {isExpandable && (
                       <span
                         className={`transit-news-arrow ${isExpanded ? 'expanded' : ''}`}
                         aria-hidden="true"
                       >
-                        ⌃
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
                       </span>
-                    </>
-                  );
-                })()}
-              </article>
+                    )}
+                  </article>
+                );
+              })()
             ))}
           </div>
         )}

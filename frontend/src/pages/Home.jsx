@@ -62,6 +62,43 @@ const getNewsBadgeLabel = (category) => {
   return 'Advisory';
 };
 
+const sanitizeNewsText = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  return String(value)
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gis, '$1')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&#x27;/gi, "'")
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const formatNewsDate = (publishedAt, createdAt) => {
+  const dateValue = publishedAt || createdAt;
+  if (!dateValue) {
+    return null;
+  }
+
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return parsed.toLocaleDateString('en-PH', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
 const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
@@ -296,24 +333,36 @@ const Home = () => {
           <div className="transit-news-list">
             {transportNews.map((item) => (
               <article key={item.news_id} className="transit-news-item">
-                <div className="transit-news-meta-row">
-                  <span className={`transit-news-badge category-${(item.category || 'advisory').toLowerCase()}`}>
-                    {getNewsBadgeLabel(item.category)}
-                  </span>
-                  <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
-                </div>
-                <strong>{item.title}</strong>
-                <p>{item.details}</p>
-                {item.source_url && (
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="transit-news-link"
-                  >
-                    Read source
-                  </a>
-                )}
+                {(() => {
+                  const cleanedTitle = sanitizeNewsText(item.title);
+                  const cleanedDetails = sanitizeNewsText(item.details);
+                  const reportDate = formatNewsDate(item.published_at, item.created_at);
+                  const showDetails = cleanedDetails && cleanedDetails !== cleanedTitle;
+
+                  return (
+                    <>
+                      <div className="transit-news-meta-row">
+                        <span className={`transit-news-badge category-${(item.category || 'advisory').toLowerCase()}`}>
+                          {getNewsBadgeLabel(item.category)}
+                        </span>
+                        <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
+                      </div>
+                      {reportDate && <time className="transit-news-date">{reportDate}</time>}
+                      <strong>{cleanedTitle || 'Transit advisory'}</strong>
+                      {showDetails && <p>{cleanedDetails}</p>}
+                      {item.source_url && (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="transit-news-link"
+                        >
+                          Read source
+                        </a>
+                      )}
+                    </>
+                  );
+                })()}
               </article>
             ))}
           </div>

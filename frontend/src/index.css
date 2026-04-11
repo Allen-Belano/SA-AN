@@ -814,6 +814,25 @@ textarea:focus {
   background: rgba(250, 253, 255, 0.9);
   display: grid;
   gap: 0.35rem;
+  max-height: 190px;
+  align-content: start;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: max-height 280ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.transit-news-item.expanded {
+  max-height: 460px;
+}
+
+.transit-news-item:hover {
+  box-shadow: 0 8px 18px rgba(94, 126, 152, 0.2);
+}
+
+.transit-news-item:focus-visible {
+  outline: 2px solid rgba(75, 129, 172, 0.55);
+  outline-offset: 2px;
 }
 
 .transit-news-item strong {
@@ -828,6 +847,28 @@ textarea:focus {
   overflow-wrap: anywhere;
 }
 
+.transit-news-item-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.transit-news-item-details {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.transit-news-item.expanded .transit-news-item-title,
+.transit-news-item.expanded .transit-news-item-details {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+}
+
 .transit-news-link {
   width: fit-content;
   font-size: 0.73rem;
@@ -840,6 +881,21 @@ textarea:focus {
 .transit-news-link:hover {
   color: #1d476a;
   border-bottom-color: rgba(29, 71, 106, 0.65);
+}
+
+.transit-news-arrow {
+  position: absolute;
+  right: 0.62rem;
+  bottom: 0.52rem;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #2e5f8a;
+  line-height: 1;
+  transition: transform 260ms ease;
+}
+
+.transit-news-arrow.expanded {
+  transform: rotate(180deg);
 }
 
 .transit-news-meta-row {
@@ -3374,6 +3430,11 @@ textarea:focus {
   .transit-news-item {
     padding: 0.62rem;
     gap: 0.3rem;
+    max-height: 176px;
+  }
+
+  .transit-news-item.expanded {
+    max-height: 520px;
   }
 
   .transit-news-item strong {
@@ -3389,6 +3450,12 @@ textarea:focus {
   .transit-news-badge,
   .transit-news-link {
     font-size: 0.66rem;
+  }
+
+  .transit-news-arrow {
+    font-size: 1.08rem;
+    right: 0.54rem;
+    bottom: 0.48rem;
   }
 }
 

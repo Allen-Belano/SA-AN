@@ -99,6 +99,20 @@ const formatNewsDate = (publishedAt, createdAt) => {
   });
 };
 
+const getNewsTimestamp = (publishedAt, createdAt) => {
+  const dateValue = publishedAt || createdAt;
+  if (!dateValue) {
+    return 0;
+  }
+
+  const parsed = new Date(dateValue);
+  if (Number.isNaN(parsed.getTime())) {
+    return 0;
+  }
+
+  return parsed.getTime();
+};
+
 const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
@@ -108,6 +122,7 @@ const Home = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [transportNews, setTransportNews] = useState([]);
   const [transportNewsError, setTransportNewsError] = useState('');
+  const [expandedNewsIds, setExpandedNewsIds] = useState([]);
   const navigate = useNavigate();
 
   const session = getStoredSession();
@@ -181,6 +196,17 @@ const Home = () => {
 
   const activeTip = commuterTips[activeTipIndex];
   const selectedMode = travelModes.find((mode) => mode.id === activeMode) || travelModes[0];
+  const sortedTransportNews = [...transportNews].sort(
+    (a, b) => getNewsTimestamp(b.published_at, b.created_at) - getNewsTimestamp(a.published_at, a.created_at)
+  );
+
+  const toggleNewsExpansion = (newsId) => {
+    setExpandedNewsIds((currentIds) => (
+      currentIds.includes(newsId)
+        ? currentIds.filter((id) => id !== newsId)
+        : [...currentIds, newsId]
+    ));
+  };
 
   return (
     <div className="screen-stack home-screen">
@@ -331,13 +357,26 @@ const Home = () => {
           <p style={{ margin: 0, fontSize: '0.82rem' }}>No active advisories right now.</p>
         ) : (
           <div className="transit-news-list">
-            {transportNews.map((item) => (
-              <article key={item.news_id} className="transit-news-item">
+            {sortedTransportNews.map((item) => (
+              <article
+                key={item.news_id}
+                className={`transit-news-item ${expandedNewsIds.includes(item.news_id) ? 'expanded' : ''}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => toggleNewsExpansion(item.news_id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleNewsExpansion(item.news_id);
+                  }
+                }}
+              >
                 {(() => {
                   const cleanedTitle = sanitizeNewsText(item.title);
                   const cleanedDetails = sanitizeNewsText(item.details);
                   const reportDate = formatNewsDate(item.published_at, item.created_at);
                   const showDetails = cleanedDetails && cleanedDetails !== cleanedTitle;
+                  const isExpanded = expandedNewsIds.includes(item.news_id);
 
                   return (
                     <>
@@ -348,18 +387,25 @@ const Home = () => {
                         <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
                       </div>
                       {reportDate && <time className="transit-news-date">{reportDate}</time>}
-                      <strong>{cleanedTitle || 'Transit advisory'}</strong>
-                      {showDetails && <p>{cleanedDetails}</p>}
+                      <strong className="transit-news-item-title">{cleanedTitle || 'Transit advisory'}</strong>
+                      {showDetails && <p className="transit-news-item-details">{cleanedDetails}</p>}
                       {item.source_url && (
                         <a
                           href={item.source_url}
                           target="_blank"
                           rel="noreferrer"
                           className="transit-news-link"
+                          onClick={(event) => event.stopPropagation()}
                         >
                           Read source
                         </a>
                       )}
+                      <span
+                        className={`transit-news-arrow ${isExpanded ? 'expanded' : ''}`}
+                        aria-hidden="true"
+                      >
+                        ⌃
+                      </span>
                     </>
                   );
                 })()}

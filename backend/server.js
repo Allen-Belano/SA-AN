@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const { Pool } = require('pg');
 require('dotenv').config();
+const { startTransportNewsScheduler, syncTransportNews } = require('./services/transportNewsSync');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -129,6 +130,85 @@ const ensureAuxiliaryTables = async () => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS TransitNews (
+      news_id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      details TEXT NOT NULL,
+      category VARCHAR(40) DEFAULT 'advisory',
+      source_label VARCHAR(120),
+      source_url TEXT,
+      published_at TIMESTAMP,
+      external_id TEXT,
+      effective_start DATE,
+      effective_end DATE,
+      is_active BOOLEAN DEFAULT TRUE,
+      priority INT DEFAULT 50,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    ALTER TABLE TransitNews
+    ADD COLUMN IF NOT EXISTS source_url TEXT,
+    ADD COLUMN IF NOT EXISTS published_at TIMESTAMP,
+    ADD COLUMN IF NOT EXISTS external_id TEXT
+  `);
+
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_transit_news_external_id
+    ON TransitNews(external_id)
+  `);
+
+  await pool.query(`
+    INSERT INTO TransitNews (title, details, category, source_label, effective_start, effective_end, is_active, priority)
+    SELECT *
+    FROM (
+      VALUES
+        (
+          'Libreng Sakay Weekend Window',
+          'Selected LGU-supported routes are fare-free this weekend from 6:00 AM to 9:00 PM. Check route terminals before boarding.',
+          'fare',
+          'LGU Advisory',
+          CURRENT_DATE,
+          CURRENT_DATE + INTERVAL '2 day',
+          TRUE,
+          90
+        ),
+        (
+          'Jeepney Strike Watch',
+          'Expect reduced jeepney availability in selected corridors. Prepare alternatives like bus or train and leave earlier than usual.',
+          'strike',
+          'Transport Coalition Bulletin',
+          CURRENT_DATE,
+          CURRENT_DATE + INTERVAL '5 day',
+          TRUE,
+          95
+        ),
+        (
+          'Fare Matrix Reminder',
+          'Operators were reminded to display updated fare matrix in all public utility vehicles. Report overcharging through local hotlines.',
+          'fare',
+          'LTFRB Reminder',
+          CURRENT_DATE - INTERVAL '3 day',
+          CURRENT_DATE + INTERVAL '30 day',
+          TRUE,
+          70
+        ),
+        (
+          'Rail Service Maintenance Advisory',
+          'Night maintenance may shorten train operations on selected dates. Expect longer queueing before final trips.',
+          'service',
+          'Rail Operations Notice',
+          CURRENT_DATE,
+          CURRENT_DATE + INTERVAL '7 day',
+          TRUE,
+          80
+        )
+    ) AS seed_data (title, details, category, source_label, effective_start, effective_end, is_active, priority)
+    WHERE NOT EXISTS (SELECT 1 FROM TransitNews)
+  `);
 };
 
 pool.connect()
@@ -141,6 +221,8 @@ pool.connect()
     await ensureUserPreferenceColumns();
     await ensureAuxiliaryTables();
     await ensureVoteConstraints();
+    await syncTransportNews(pool);
+    startTransportNewsScheduler(pool);
   })
   .catch(err => console.error('Database connection error:', err));
 
@@ -156,12 +238,14 @@ const routeRoutes = require('./routes/routes');
 const updatesRoutes = require('./routes/updates');
 const notificationsRoutes = require('./routes/notifications');
 const chatbotRoutes = require('./routes/chatbot');
+const transportNewsRoutes = require('./routes/transportNews');
 
 app.use('/api/users', userRoutes);
 app.use('/api/routes', routeRoutes);
 app.use('/api/updates', updatesRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/transport-news', transportNewsRoutes);
 
 app.get('/', (req, res) => {
   res.send('SA/AN API is running');

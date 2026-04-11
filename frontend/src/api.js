@@ -180,6 +180,11 @@ export const createCommunityUpdate = async (payload) => {
   return response.data;
 };
 
+export const getTransportNews = async (params = {}) => {
+  const response = await api.get('/transport-news', { params });
+  return response.data;
+};
+
 export const askCommuterChatbot = async (payload) => {
   const response = await api.post('/chatbot/assist', payload);
   return response.data;

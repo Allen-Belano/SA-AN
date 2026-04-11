@@ -788,6 +788,88 @@ textarea:focus {
   background: linear-gradient(140deg, #7f8be3, #606dcb);
 }
 
+.transit-news-card {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.transit-news-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.transit-news-item {
+  border: 1px solid rgba(189, 212, 229, 0.88);
+  border-radius: 14px;
+  padding: 0.72rem;
+  background: rgba(250, 253, 255, 0.9);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.transit-news-item strong {
+  font-size: 0.88rem;
+  color: #24374d;
+}
+
+.transit-news-item p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.transit-news-link {
+  width: fit-content;
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: #2e5f8a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(46, 95, 138, 0.35);
+}
+
+.transit-news-link:hover {
+  color: #1d476a;
+  border-bottom-color: rgba(29, 71, 106, 0.65);
+}
+
+.transit-news-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.transit-news-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.24rem 0.52rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+}
+
+.transit-news-badge.category-fare {
+  background: rgba(219, 240, 255, 0.9);
+  color: #235682;
+}
+
+.transit-news-badge.category-strike {
+  background: rgba(255, 228, 204, 0.9);
+  color: #7a3f16;
+}
+
+.transit-news-badge.category-service,
+.transit-news-badge.category-advisory {
+  background: rgba(228, 236, 255, 0.9);
+  color: #4a4f9f;
+}
+
+.transit-news-source {
+  font-size: 0.7rem;
+  color: #65748a;
+  font-weight: 700;
+}
+
 .tip-item {
   display: flex;
   align-items: center;

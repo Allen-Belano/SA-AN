@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNotifications, getRouteRecommendations, getStoredSession } from '../api';
+import { getNotifications, getRouteRecommendations, getStoredSession, getTransportNews } from '../api';
 
 const commuterTips = [
   {
@@ -44,6 +44,24 @@ const recommendations = [
   { id: 3, title: 'Fast Transfer Plans', subtitle: 'Less waiting, less walking' },
 ];
 
+const getNewsBadgeLabel = (category) => {
+  const normalized = (category || '').toLowerCase();
+
+  if (normalized === 'fare') {
+    return 'Fare';
+  }
+
+  if (normalized === 'strike') {
+    return 'Strike';
+  }
+
+  if (normalized === 'service') {
+    return 'Service';
+  }
+
+  return 'Advisory';
+};
+
 const Home = () => {
   const [start, setStart] = useState('');
   const [destination, setDestination] = useState('');
@@ -51,6 +69,8 @@ const Home = () => {
   const [activeTipIndex, setActiveTipIndex] = useState(0);
   const [dynamicRecommendations, setDynamicRecommendations] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [transportNews, setTransportNews] = useState([]);
+  const [transportNewsError, setTransportNewsError] = useState('');
   const navigate = useNavigate();
 
   const session = getStoredSession();
@@ -84,6 +104,36 @@ const Home = () => {
 
     loadPersonalization();
   }, [session?.user?.user_id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadTransportNews = async () => {
+      try {
+        const result = await getTransportNews({ limit: 6, active: true });
+        if (!mounted) {
+          return;
+        }
+
+        setTransportNews(result.updates || []);
+        setTransportNewsError('');
+      } catch {
+        if (!mounted) {
+          return;
+        }
+
+        setTransportNewsError('Live transit advisories are temporarily unavailable.');
+      }
+    };
+
+    loadTransportNews();
+    const refreshId = window.setInterval(loadTransportNews, 180000);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(refreshId);
+    };
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -230,6 +280,44 @@ const Home = () => {
             />
           ))}
         </div>
+      </div>
+
+      <div className="card card-soft glass-card transit-news-card">
+        <div className="row-between" style={{ marginBottom: '0.8rem' }}>
+          <h2 style={{ marginBottom: 0 }}>Transit Alerts</h2>
+          <span className="pill">Live updates</span>
+        </div>
+
+        {transportNewsError ? (
+          <p style={{ margin: 0, fontSize: '0.82rem' }}>{transportNewsError}</p>
+        ) : transportNews.length === 0 ? (
+          <p style={{ margin: 0, fontSize: '0.82rem' }}>No active advisories right now.</p>
+        ) : (
+          <div className="transit-news-list">
+            {transportNews.map((item) => (
+              <article key={item.news_id} className="transit-news-item">
+                <div className="transit-news-meta-row">
+                  <span className={`transit-news-badge category-${(item.category || 'advisory').toLowerCase()}`}>
+                    {getNewsBadgeLabel(item.category)}
+                  </span>
+                  <span className="transit-news-source">{item.source_label || 'Transit Bulletin'}</span>
+                </div>
+                <strong>{item.title}</strong>
+                <p>{item.details}</p>
+                {item.source_url && (
+                  <a
+                    href={item.source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transit-news-link"
+                  >
+                    Read source
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="inline-grid">

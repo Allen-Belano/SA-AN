@@ -45,7 +45,6 @@ const Login = () => {
           user_id: Date.now(),
           name: normalizedName,
           email: normalizedEmail,
-          avatar_color: '#f0932b',
           avatar_memoji: null,
           is_new_user: mode === 'signup',
         },

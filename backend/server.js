@@ -29,7 +29,6 @@ const ensureProfileColumns = async () => {
     ADD COLUMN IF NOT EXISTS budget_level VARCHAR(50),
     ADD COLUMN IF NOT EXISTS travel_window VARCHAR(100),
     ADD COLUMN IF NOT EXISTS emergency_contact VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS avatar_color VARCHAR(50) DEFAULT '#f0932b',
     ADD COLUMN IF NOT EXISTS avatar_memoji JSONB
   `);
 };

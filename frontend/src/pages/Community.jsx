@@ -302,7 +302,7 @@ const Community = () => {
           {updates.map((update) => (
             <article key={update.update_id} className="card card-soft community-post">
               <div className="community-post-header">
-                <div className="community-author-avatar" style={{ background: update.avatar_color || '#f0932b' }}>
+                <div className="community-author-avatar" style={{ background: '#f0932b' }}>
                   {update.avatar_memoji ? (
                     <MemojiAvatar config={update.avatar_memoji} size={34} />
                   ) : (

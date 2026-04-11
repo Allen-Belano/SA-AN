@@ -49,13 +49,10 @@ const defaultProfile = {
   budget_level: '',
   travel_window: '',
   emergency_contact: '',
-  avatar_color: '#f0932b',
   avatar_memoji: defaultMemoji,
   is_new_user: false,
   reputation_points: 0,
 };
-
-const colorOptions = ['#f0932b', '#40b285', '#e57f84', '#7a9ef8'];
 
 const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
   const navigate = useNavigate();
@@ -218,7 +215,7 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
       </div>
 
       <div className="card card-soft glass-card profile-hero">
-        <div className="profile-avatar" aria-hidden="true" style={{ background: `linear-gradient(145deg, ${profile.avatar_color}, #dd7c17)` }}>
+        <div className="profile-avatar" aria-hidden="true" style={{ background: 'linear-gradient(145deg, #f0932b, #dd7c17)' }}>
           {profile.avatar_memoji ? (
             <MemojiAvatar config={profile.avatar_memoji} size={76} className="profile-memoji-avatar" />
           ) : (
@@ -360,22 +357,6 @@ const Profile = ({ theme = 'light', onToggleTheme = () => {} }) => {
                 value={profile.emergency_contact}
                 onChange={handleFieldChange}
               />
-            </div>
-
-            <div className="input-group">
-              <label>Profile Accent</label>
-              <div className="color-row">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={`color-dot ${profile.avatar_color === color ? 'active' : ''}`}
-                    style={{ background: color }}
-                    onClick={() => setProfile((current) => ({ ...current, avatar_color: color }))}
-                    aria-label={`Choose ${color} accent`}
-                  />
-                ))}
-              </div>
             </div>
 
             <div className="card card-soft memoji-editor-card">

@@ -22,7 +22,6 @@ const mapUserProfile = (user) => ({
     budget_level: user.budget_level || '',
     travel_window: user.travel_window || '',
     emergency_contact: user.emergency_contact || '',
-    avatar_color: user.avatar_color || '#f0932b',
     avatar_memoji: user.avatar_memoji || null,
     notify_disruptions: user.notify_disruptions !== false,
     notify_safety: user.notify_safety !== false,
@@ -130,7 +129,6 @@ router.put('/me', authenticateUser, async (req, res) => {
             budget_level,
             travel_window,
             emergency_contact,
-            avatar_color,
             avatar_memoji,
             notify_disruptions,
             notify_safety,
@@ -146,12 +144,11 @@ router.put('/me', authenticateUser, async (req, res) => {
                  budget_level = $5,
                  travel_window = $6,
                  emergency_contact = $7,
-                 avatar_color = $8,
-                 avatar_memoji = $9,
-                 notify_disruptions = $10,
-                 notify_safety = $11,
-                 notify_saved_routes = $12
-             WHERE user_id = $13
+                 avatar_memoji = $8,
+                 notify_disruptions = $9,
+                 notify_safety = $10,
+                 notify_saved_routes = $11
+             WHERE user_id = $12
              RETURNING *`,
             [
                 name,
@@ -161,7 +158,6 @@ router.put('/me', authenticateUser, async (req, res) => {
                 budget_level || '',
                 travel_window || '',
                 emergency_contact || '',
-                avatar_color || '#f0932b',
                 avatar_memoji && typeof avatar_memoji === 'object' ? avatar_memoji : null,
                 notify_disruptions !== false,
                 notify_safety !== false,

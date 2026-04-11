@@ -14,7 +14,6 @@ const mapUpdate = (row) => ({
     is_urgent: Boolean(row.is_urgent),
     timestamp: row.timestamp,
     author_name: row.author_name,
-    avatar_color: row.avatar_color || '#f0932b',
     avatar_memoji: row.avatar_memoji || null,
     reputation_points: row.reputation_points || 0,
     reaction_count: Number(row.reaction_count || 0),
@@ -44,7 +43,6 @@ router.get('/', async (req, res) => {
                 u.is_urgent,
                 u.timestamp,
                 us.name AS author_name,
-                us.avatar_color,
                 us.avatar_memoji,
                 us.reputation_points,
                 COALESCE(reaction_stats.reaction_count, 0) AS reaction_count,
@@ -175,7 +173,6 @@ router.post('/', async (req, res) => {
                 u.is_urgent,
                 u.timestamp,
                 us.name AS author_name,
-                us.avatar_color,
                 us.avatar_memoji,
                 us.reputation_points,
                 COALESCE(reaction_stats.reaction_count, 0) AS reaction_count,
@@ -251,7 +248,6 @@ router.get('/:id/comments', async (req, res) => {
                 c.comment,
                 c.created_at,
                 COALESCE(u.name, 'Commuter') AS author_name,
-                     COALESCE(u.avatar_color, '#f0932b') AS avatar_color,
                      u.avatar_memoji
              FROM UpdateComments c
              LEFT JOIN Users u ON u.user_id = c.user_id
@@ -292,7 +288,6 @@ router.post('/:id/comments', async (req, res) => {
                 c.comment,
                 c.created_at,
                 COALESCE(u.name, 'Commuter') AS author_name,
-                     COALESCE(u.avatar_color, '#f0932b') AS avatar_color,
                      u.avatar_memoji
              FROM UpdateComments c
              LEFT JOIN Users u ON u.user_id = c.user_id

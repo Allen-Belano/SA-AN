@@ -10,7 +10,7 @@ import Profile from './pages/Profile';
 import CommuterGuideChatbot from './components/CommuterGuideChatbot';
 import { getStoredSession } from './api';
 
-
+const THEME_STORAGE_KEY = 'saan-theme';
 
 const getInitialTheme = () => {
   const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
